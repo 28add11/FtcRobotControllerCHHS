@@ -85,11 +85,14 @@ public class ScanServoTEST extends LinearOpMode {
         while(opModeIsActive()){
 
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
-            boolean gamepadA = gamepad1.a;
-			if (gamepadA && !prevcycleA) {
+            
+			if (gamepad1.a; && !prevcycleA) {
 				rampUp = !rampUp;
-			} else if (prevcycleA && !gamepadA) {
+			} else if (prevcycleA && !gamepad1.a;) {
 				prevcycleA = false;
+			}
+			if (gamepad1.a) {
+				prevcycleA = true;
 			}
 
             if (rampUp) {
