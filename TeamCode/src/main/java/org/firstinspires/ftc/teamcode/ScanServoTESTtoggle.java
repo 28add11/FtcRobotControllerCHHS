@@ -65,7 +65,7 @@ public class ScanServoTEST extends LinearOpMode {
     Servo testServo;
     double  position = (MIN_POS); // Start at 0
     boolean rampUp = false;
-	boolean prevcycleA = false;
+	boolean ispressed = false;
 
 
     @Override
@@ -86,14 +86,14 @@ public class ScanServoTEST extends LinearOpMode {
 
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
             
-			if (gamepad1.a; && !prevcycleA) {
+			if (gamepad1.a; && !ispressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
 				rampUp = !rampUp;
-			} else if (prevcycleA && !gamepad1.a;) {
-				prevcycleA = false;
+                ispressed = true;
+			} else if (ispressed && !gamepad1.a;) { //if no button was pressed and ispressed is true, then...
+				ispressed = false;
 			}
-			if (gamepad1.a) {
-				prevcycleA = true;
-			}
+
+            //nothing needs to be done if no button is pressed and the ispressed is false, or if ispressed is true and the button is still being pressed
 
             if (rampUp) {
                 // Keep stepping up until we hit the max value.
