@@ -49,15 +49,12 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 // ***** CRESCENT COMMENT *****
-// The goal of this program is to test how we can control the servos.
-// The idea was to have a servo rotate when A is held down on the controller
-// and rotate back when released. The max our servos can rotate is measured at 270
-// degrees, therefore values for servo positions must be divided by 270.0 in order
-// to set values in terms of degrees.
+// This program is exactly the same as ScanServoTEST.java, except it is meant to use a toggle
+//instead of a push and hold.
 
-@TeleOp(name = "servoHold", group = "Concept")
+@TeleOp(name = "Concept: Scan Servo", group = "Concept")
 //@Disabled
-public class ScanServoTEST extends LinearOpMode {
+public class servoToggle extends LinearOpMode {
 
     static final double INCREMENT   =         0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =           50;     // period of each cycle
@@ -68,6 +65,7 @@ public class ScanServoTEST extends LinearOpMode {
     Servo testServo;
     double  position = (MIN_POS); // Start at 0
     boolean rampUp = false;
+	boolean ispressed = false;
 
 
     @Override
@@ -87,7 +85,16 @@ public class ScanServoTEST extends LinearOpMode {
         while(opModeIsActive()){
 
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
-            rampUp = gamepad1.a;
+            
+			if (gamepad1.a && !ispressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+				rampUp = !rampUp;
+                ispressed = true;
+			} else if (ispressed && !gamepad1.a) { //if no button was pressed and ispressed is true, then...
+				ispressed = false;
+			}
+
+            //nothing needs to be done if no button is pressed and the ispressed is false, or if ispressed is true and the button is still being pressed
+
             if (rampUp) {
                 // Keep stepping up until we hit the max value.
                 position += INCREMENT ;
@@ -103,6 +110,7 @@ public class ScanServoTEST extends LinearOpMode {
                     position = MIN_POS;
 //                    rampUp = !rampUp;  // Switch ramp direction
                 }
+
             }
 
             // Display the current value
