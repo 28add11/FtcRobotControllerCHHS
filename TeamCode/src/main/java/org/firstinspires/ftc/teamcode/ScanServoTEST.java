@@ -55,7 +55,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 // degrees, therefore values for servo positions must be divided by 270.0 in order
 // to set values in terms of degrees.
 
-@TeleOp(name = "Concept: Scan Servo", group = "Concept")
+@TeleOp(name = "servoHold", group = "Concept")
 //@Disabled
 public class ScanServoTEST extends LinearOpMode {
 

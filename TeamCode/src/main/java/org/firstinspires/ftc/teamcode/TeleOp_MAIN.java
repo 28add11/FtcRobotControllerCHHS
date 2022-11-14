@@ -29,10 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -63,9 +63,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="drivetrain", group="Linear Opmode")
+@TeleOp(name="MAIN", group="Linear Opmode")
 //@Disabled
-public class BasicOmniOpMode_LinearTEST extends LinearOpMode {
+public class TeleOp_MAIN extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -73,6 +73,7 @@ public class BasicOmniOpMode_LinearTEST extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    private Servo servo;
 
     @Override
     public void runOpMode() {
@@ -83,6 +84,7 @@ public class BasicOmniOpMode_LinearTEST extends LinearOpMode {
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        servo = hardwareMap.get(Servo.class, "testServo ");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -115,6 +117,8 @@ public class BasicOmniOpMode_LinearTEST extends LinearOpMode {
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
 
+            boolean servoMove = gamepad1.left_bumper;
+
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
             double leftFrontPower  = axial + lateral + yaw;
@@ -134,6 +138,12 @@ public class BasicOmniOpMode_LinearTEST extends LinearOpMode {
                 leftBackPower   /= max;
                 rightBackPower  /= max;
             }
+
+            if (servoMove){
+                servo.setPosition(0.38);
+            }
+
+
 
             // This is test code:
             //
