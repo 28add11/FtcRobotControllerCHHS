@@ -74,16 +74,16 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private Servo servo;
+    private Servo testServo;
 
-
-    //Servo stuff
+    // Servo stuff
     static final double INCREMENT   =         0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =           50;     // period of each cycle
     static final double MAX_POS     =   20.0/270.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
     static final double MIN_POS     =          0.0;     // Minimum rotational position
 
     // Define class members
-    Servo testServo;
+
     double  position = (MIN_POS); // Start at 0
     boolean rampUp = false;
     boolean ispressed = false;
@@ -123,7 +123,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        //SERVO STUFF
+        // SERVO STUFF
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
         testServo = hardwareMap.get(Servo.class, "test_servo");
@@ -136,7 +136,7 @@ public class TeleOp_MAIN extends LinearOpMode {
 
         // Scan servo till stop pressed.
 
-        //SERVO STUFF
+        // SERVO STUFF
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -173,32 +173,13 @@ public class TeleOp_MAIN extends LinearOpMode {
                 servo.setPosition(0.38);
             }
 
-
-
-            // This is test code:
-            //
-            // Uncomment the following code to test your motor directions.
-            // Each button should make the corresponding motor run FORWARD.
-            //   1) First get all the motors to take to correct positions on the robot
-            //      by adjusting your Robot Configuration if necessary.
-            //   2) Then make sure they run in the correct direction by modifying the
-            //      the setDirection() calls above.
-            // Once the correct motors move in the correct direction re-comment this code.
-
-            /*
-            leftFrontPower  = gamepad1.x ? 1.0 : 0.0;  // X gamepad
-            leftBackPower   = gamepad1.a ? 1.0 : 0.0;  // A gamepad
-            rightFrontPower = gamepad1.y ? 1.0 : 0.0;  // Y gamepad
-            rightBackPower  = gamepad1.b ? 1.0 : 0.0;  // B gamepad
-            */
-
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
-            //SERVO STUFF
+            // SERVO STUFF
 
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
 
@@ -216,7 +197,6 @@ public class TeleOp_MAIN extends LinearOpMode {
                 position += INCREMENT ;
                 if (position > MAX_POS ) {
                     position = MAX_POS;
-//                    rampUp = !rampUp;   // Switch ramp direction
                 }
             }
             else {
@@ -224,7 +204,6 @@ public class TeleOp_MAIN extends LinearOpMode {
                 position -= INCREMENT ;
                 if (position < MIN_POS ) {
                     position = MIN_POS;
-//                    rampUp = !rampUp;  // Switch ramp direction
                 }
 
             }
@@ -234,21 +213,16 @@ public class TeleOp_MAIN extends LinearOpMode {
             telemetry.addData(">", "Press Stop to end test." );
             // Set the servo to the new position and pause;
             testServo.setPosition(position);
+            sleep(CYCLE_MS);
+            idle();
 
-            //I dont think we need this stuff? if we do we'll find out with an error.
-            //sleep(CYCLE_MS);
-            //idle();
-
-            //SERVO STUFF END
+            // SERVO STUFF END
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.update();
-
-
-
 
         }
 

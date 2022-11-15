@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 // This program is exactly the same as ScanServoTEST.java, except it is meant to use a toggle
 //instead of a push and hold.
 
-@TeleOp(name = "Concept: Scan Servo", group = "Concept")
+@TeleOp(name = "servoToggle", group = "Concept")
 //@Disabled
 public class servoToggle extends LinearOpMode {
 

@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -42,10 +41,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The code assumes that you do NOT have encoders on the wheels,
  *   otherwise you would use: RobotAutoDriveByEncoder;
  *
+ * The code also assumes an omni-wheel drivetrain
+ *
  *   The desired path in this example is:
- *   - Drive forward for 3 seconds
- *   - Spin right for 1.3 seconds
- *   - Drive Backward for 1 Second
+ *   - Drive right for 3 seconds
+ *
  *
  *  The code is written in a simple form with no optimizations.
  *  However, there are several ways that this type of sequence could be streamlined,
@@ -54,13 +54,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Robot: Auto Drive By Time", group="Robot")
+@Autonomous(name="Auto Drive Right", group="Robot")
 //@Disabled
-public class RobotAutoDriveByTime_LinearSample extends LinearOpMode {
+public class autoDriveRight extends LinearOpMode {
 
-    /* Declare OpMode members. */
-    private DcMotor         leftDrive   = null;
-    private DcMotor         rightDrive  = null;
+    // Declare OpMode members for each of the 4 motors.
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
 
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -68,18 +70,58 @@ public class RobotAutoDriveByTime_LinearSample extends LinearOpMode {
     static final double     FORWARD_SPEED = 0.6;
     static final double     TURN_SPEED    = 0.5;
 
+    // Method that simplifies instruction for movement, math required to determine power is done here
+    // Is a copy of math done from a template, and is in use in our main program
+    public void setMotorInstruction(double movementY, double movementX, double rotation) {
+
+        double max;
+
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        double axial = movementY;
+        double lateral =  movementX;
+        double yaw =  rotation;
+
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+        double leftFrontPower  = axial + lateral + yaw;
+        double rightFrontPower = axial - lateral - yaw;
+        double leftBackPower   = axial - lateral + yaw;
+        double rightBackPower  = axial + lateral - yaw;
+
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(rightBackPower));
+
+        if (max > 1.0) {
+            leftFrontPower  /= max;
+            rightFrontPower /= max;
+            leftBackPower   /= max;
+            rightBackPower  /= max;
+        }
+
+        // Send calculated power to wheels
+        leftFrontDrive.setPower(leftFrontPower);
+        rightFrontDrive.setPower(rightFrontPower);
+        leftBackDrive.setPower(leftBackPower);
+        rightBackDrive.setPower(rightBackPower);
+
+        telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
+        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+        telemetry.update();
+    }
+
     @Override
     public void runOpMode() {
-
-        // Initialize the drive system variables.
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //
@@ -90,37 +132,16 @@ public class RobotAutoDriveByTime_LinearSample extends LinearOpMode {
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
-        // Step 1:  Drive forward for 3 seconds
-        leftDrive.setPower(FORWARD_SPEED);
-        rightDrive.setPower(FORWARD_SPEED);
+        // Step 1:  Drive Sideways for 3 Seconds
+        setMotorInstruction(0, FORWARD_SPEED, 0);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 3.0)) {
-            telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }
-
-        // Step 2:  Spin right for 1.3 seconds
-        leftDrive.setPower(TURN_SPEED);
-        rightDrive.setPower(-TURN_SPEED);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.3)) {
-            telemetry.addData("Path", "Leg 2: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }
-
-        // Step 3:  Drive Backward for 1 Second
-        leftDrive.setPower(-FORWARD_SPEED);
-        rightDrive.setPower(-FORWARD_SPEED);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.0)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
 
-        // Step 4:  Stop
-        leftDrive.setPower(0);
-        rightDrive.setPower(0);
-
+        // Step 2:  Stop
+        setMotorInstruction(0, 0, 0);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);
