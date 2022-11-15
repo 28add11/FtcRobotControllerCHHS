@@ -75,6 +75,21 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private Servo servo;
 
+
+    //Servo stuff
+    static final double INCREMENT   =         0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    =           50;     // period of each cycle
+    static final double MAX_POS     =   20.0/270.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
+    static final double MIN_POS     =          0.0;     // Minimum rotational position
+
+    // Define class members
+    Servo testServo;
+    double  position = (MIN_POS); // Start at 0
+    boolean rampUp = false;
+    boolean ispressed = false;
+    //Servo stuff end
+
+
     @Override
     public void runOpMode() {
 
@@ -107,6 +122,21 @@ public class TeleOp_MAIN extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
+
+        //SERVO STUFF
+        // Connect to servo (Assume Robot Left Hand)
+        // Change the text in quotes to match any servo name on your robot.
+        testServo = hardwareMap.get(Servo.class, "test_servo");
+
+        // Wait for the start button
+        telemetry.addData(">", "Press Start to scan Servo." );
+        telemetry.update();
+        waitForStart();
+
+
+        // Scan servo till stop pressed.
+
+        //SERVO STUFF
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -168,10 +198,62 @@ public class TeleOp_MAIN extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
+            //SERVO STUFF
+
+            // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
+
+            if (gamepad1.a && !ispressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+                rampUp = !rampUp;
+                ispressed = true;
+            } else if (ispressed && !gamepad1.a) { //if no button was pressed and ispressed is true, then...
+                ispressed = false;
+            }
+
+            //nothing needs to be done if no button is pressed and the ispressed is false, or if ispressed is true and the button is still being pressed
+
+            if (rampUp) {
+                // Keep stepping up until we hit the max value.
+                position += INCREMENT ;
+                if (position > MAX_POS ) {
+                    position = MAX_POS;
+//                    rampUp = !rampUp;   // Switch ramp direction
+                }
+            }
+            else {
+                // Keep stepping down until we hit the min value.
+                position -= INCREMENT ;
+                if (position < MIN_POS ) {
+                    position = MIN_POS;
+//                    rampUp = !rampUp;  // Switch ramp direction
+                }
+
+            }
+
+            // Display the current value
+            telemetry.addData("Servo Position", "%5.2f", position);
+            telemetry.addData(">", "Press Stop to end test." );
+            // Set the servo to the new position and pause;
+            testServo.setPosition(position);
+
+            //I dont think we need this stuff? if we do we'll find out with an error.
+            //sleep(CYCLE_MS);
+            //idle();
+
+            //SERVO STUFF END
+
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.update();
+
+
+
+
         }
-    }}
+
+        // Signal done;
+        telemetry.addData(">", "Done");
+        telemetry.update();
+    }
+}
