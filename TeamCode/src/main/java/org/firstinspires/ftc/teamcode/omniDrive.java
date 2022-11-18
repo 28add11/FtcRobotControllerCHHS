@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -66,7 +67,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @TeleOp(name="drivetrain", group="Linear Opmode")
-//@Disabled
+@Disabled
 public class omniDrive extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.

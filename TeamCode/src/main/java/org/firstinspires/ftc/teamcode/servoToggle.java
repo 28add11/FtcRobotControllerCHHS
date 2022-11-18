@@ -29,8 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
@@ -53,7 +56,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 //instead of a push and hold.
 
 @TeleOp(name = "servoToggle", group = "Concept")
-//@Disabled
+@Disabled
 public class servoToggle extends LinearOpMode {
 
     static final double INCREMENT   =         0.01;     // amount to slew servo each CYCLE_MS cycle
@@ -63,6 +66,7 @@ public class servoToggle extends LinearOpMode {
 
     // Define class members
     Servo testServo;
+    CRServo testContinous;
     double  position = (MIN_POS); // Start at 0
     boolean rampUp = false;
 	boolean ispressed = false;
@@ -73,7 +77,9 @@ public class servoToggle extends LinearOpMode {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        testServo = hardwareMap.get(Servo.class, "test_servo");
+//        testServo = hardwareMap.get(Servo.class, "test_servo");
+        testContinous = hardwareMap.get(CRServo.class, "test_servo");
+        testContinous.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
@@ -85,7 +91,9 @@ public class servoToggle extends LinearOpMode {
         while(opModeIsActive()){
 
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
-            
+
+            testContinous.setPower(1.0);
+
 			if (gamepad1.a && !ispressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
 				rampUp = !rampUp;
                 ispressed = true;
@@ -111,6 +119,9 @@ public class servoToggle extends LinearOpMode {
 //                    rampUp = !rampUp;  // Switch ramp direction
                 }
 
+
+
+
             }
 
             // Display the current value
@@ -119,7 +130,7 @@ public class servoToggle extends LinearOpMode {
             telemetry.update();
 
             // Set the servo to the new position and pause;
-            testServo.setPosition(position);
+//            testServo.setPosition(position);
             sleep(CYCLE_MS);
             idle();
         }

@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -56,7 +57,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 // to set values in terms of degrees.
 
 @TeleOp(name = "servoHold", group = "Concept")
-//@Disabled
+@Disabled
 public class servoHold extends LinearOpMode {
 
     static final double INCREMENT   =         0.01;     // amount to slew servo each CYCLE_MS cycle

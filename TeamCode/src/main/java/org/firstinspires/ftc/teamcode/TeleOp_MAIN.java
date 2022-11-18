@@ -73,19 +73,22 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private Servo servo;
-    private Servo testServo;
+    private Servo clawServo;
+    private Servo slideServo;
 
     // Servo stuff
-    static final double INCREMENT   =         0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =           50;     // period of each cycle
-    static final double MAX_POS     =   20.0/270.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
-    static final double MIN_POS     =          0.0;     // Minimum rotational position
+    static final double INCREMENT_CLAW  =         0.03;     // amount to slew claw servo each CYCLE_MS cycle
+    static final double INCREMENT_SLIDE =         0.10;     // amount to slew slide servo
+    static final int    CYCLE_MS        =           50;     // period of each cycle
+    static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
+    static final double MIN_POS         =          0.0;     // Minimum rotational position
+    static final double MAX_CLAW        =  135.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
 
-    double  position = (MIN_POS); // Start at 0
-    boolean rampUp = false;
+    double clawPos = (MIN_POS);  // Start at 0
+    double slidePos = (MIN_POS); // Start at 0
+    boolean clawActivated = false;
     boolean ispressed = false;
     //Servo stuff end
 
@@ -99,7 +102,8 @@ public class TeleOp_MAIN extends LinearOpMode {
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
-        servo = hardwareMap.get(Servo.class, "testServo ");
+        clawServo = hardwareMap.get(Servo.class, "claw_servo");
+        slideServo = hardwareMap.get(Servo.class, "slide_servo");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -123,31 +127,23 @@ public class TeleOp_MAIN extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        // SERVO STUFF
-        // Connect to servo (Assume Robot Left Hand)
-        // Change the text in quotes to match any servo name on your robot.
-        testServo = hardwareMap.get(Servo.class, "test_servo");
-
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
         telemetry.update();
         waitForStart();
 
 
-        // Scan servo till stop pressed.
-
-        // SERVO STUFF
-
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+
             double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
-
-            boolean servoMove = gamepad1.left_bumper;
+            boolean lowerSlide = gamepad1.x;
+            boolean raiseSlide = gamepad1.b;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -169,9 +165,6 @@ public class TeleOp_MAIN extends LinearOpMode {
                 rightBackPower  /= max;
             }
 
-            if (servoMove){
-                servo.setPosition(0.38);
-            }
 
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
@@ -184,35 +177,54 @@ public class TeleOp_MAIN extends LinearOpMode {
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
 
             if (gamepad1.a && !ispressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
-                rampUp = !rampUp;
+                clawActivated = !clawActivated;
                 ispressed = true;
             } else if (ispressed && !gamepad1.a) { //if no button was pressed and ispressed is true, then...
                 ispressed = false;
             }
 
-            //nothing needs to be done if no button is pressed and the ispressed is false, or if ispressed is true and the button is still being pressed
+            // nothing needs to be done if no button is pressed and the ispressed is false, or if ispressed is true and the button is still being pressed
 
-            if (rampUp) {
+            // Claw activation determined by pressing A as above
+            if (clawActivated) {
                 // Keep stepping up until we hit the max value.
-                position += INCREMENT ;
-                if (position > MAX_POS ) {
-                    position = MAX_POS;
+                clawPos += INCREMENT_CLAW;
+                if (clawPos > MAX_CLAW ) {
+                    clawPos = MAX_CLAW;
                 }
             }
             else {
                 // Keep stepping down until we hit the min value.
-                position -= INCREMENT ;
-                if (position < MIN_POS ) {
-                    position = MIN_POS;
+                clawPos -= INCREMENT_CLAW;
+                if (clawPos < MIN_POS ) {
+                    clawPos = MIN_POS;
+                }
+
+            }
+
+            // Statement that lowers and raises the slide when X or B are pressed
+            if (raiseSlide) {
+                // Keep stepping up until we hit the max value.
+                slidePos += INCREMENT_SLIDE;
+                if (slidePos > MAX_CLAW ) {
+                    slidePos = MAX_POS;
+                }
+            }
+            else if (lowerSlide) {
+                // Keep stepping down until we hit the min value.
+                slidePos -= INCREMENT_SLIDE;
+                if (slidePos < MIN_POS ) {
+                    slidePos = MIN_POS;
                 }
 
             }
 
             // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
+            telemetry.addData("Servo Position", "%5.2f", clawPos);
             telemetry.addData(">", "Press Stop to end test." );
             // Set the servo to the new position and pause;
-            testServo.setPosition(position);
+            clawServo.setPosition(clawPos);
+            slideServo.setPosition(slidePos);
             sleep(CYCLE_MS);
             idle();
 

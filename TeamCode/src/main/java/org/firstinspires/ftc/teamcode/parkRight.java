@@ -44,7 +44,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The code also assumes an omni-wheel drivetrain
  *
  *   The desired path in this example is:
- *   - Drive left for 3 seconds
+ *   - Strafe right for 1.5 seconds
  *
  *
  *  The code is written in a simple form with no optimizations.
@@ -54,9 +54,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Auto Drive Left", group="Robot")
+@Autonomous(name="Park Right", group="Robot")
 //@Disabled
-public class autoDriveLeft extends LinearOpMode {
+public class parkRight extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private DcMotor leftFrontDrive = null;
@@ -115,6 +115,14 @@ public class autoDriveLeft extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        // Initialize the hardware variables. Note that the strings used here must correspond
+        // to the names assigned during the robot configuration step on the DS or RC devices.
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+
+
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -132,12 +140,10 @@ public class autoDriveLeft extends LinearOpMode {
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
-        // Step 1:  Drive Sideways for 3 Seconds
-        // ** Note: movementX has been reversed with negative sign, +ve values strafe right
-        // **       while -ve values strafe left
-        setMotorInstruction(0, -FORWARD_SPEED, 0);
+        // Step 1:  Strafe right for 1.5 Seconds
+        setMotorInstruction(0, FORWARD_SPEED, 0);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 3.0)) {
+        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
