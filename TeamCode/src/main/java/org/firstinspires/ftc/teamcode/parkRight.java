@@ -35,8 +35,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
- * This file illustrates the concept of driving a path based on time.
- * The code is structured as a LinearOpMode
  *
  * The code assumes that you do NOT have encoders on the wheels,
  *   otherwise you would use: RobotAutoDriveByEncoder;
@@ -72,6 +70,8 @@ public class parkRight extends LinearOpMode {
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
+
+    //movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
     public void setMotorInstruction(double movementY, double movementX, double rotation) {
 
         double max;

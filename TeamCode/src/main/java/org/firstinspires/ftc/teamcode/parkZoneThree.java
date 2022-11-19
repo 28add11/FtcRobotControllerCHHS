@@ -30,11 +30,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
+ * IMPORTANT NOTE: THIS PROGRAM IS INVALID FOR COMPETITION;
+ * PROOF OF CONCEPT TO SERVE FOR FUTURE USE ***
+ *
  * This file illustrates the concept of driving a path based on time.
  * The code is structured as a LinearOpMode
  *
@@ -44,9 +48,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The code also assumes an omni-wheel drivetrain
  *
  *   The desired path in this example is:
- *   - Move forward for 1.3 seconds
- *   - Brief pause
  *   - Strafe right for 1.3 seconds
+ *   - Brief pause
+ *   - Move forward for 1.3 seconds
  *
  *
  *  The code is written in a simple form with no optimizations.
@@ -57,7 +61,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @Autonomous(name="3: Solar", group="Robot")
-//@Disabled
+@Disabled
 public class parkZoneThree extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
@@ -74,6 +78,8 @@ public class parkZoneThree extends LinearOpMode {
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
+
+    // movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
     public void setMotorInstruction(double movementY, double movementX, double rotation) {
 
         double max;
@@ -141,8 +147,8 @@ public class parkZoneThree extends LinearOpMode {
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
-        // Step 1:  Move forward for 1.3 Seconds
-        setMotorInstruction(FORWARD_SPEED, 0, 0);
+        // Step 1:  Strafe right for 1.3 seconds
+        setMotorInstruction(0, FORWARD_SPEED, 0);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 1.3)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
@@ -156,9 +162,8 @@ public class parkZoneThree extends LinearOpMode {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
-
-        // Step 3:  Strafe right for 1.3 seconds
-        setMotorInstruction(0, FORWARD_SPEED, 0);
+        // Step 3:  Move forward for 1.3 Seconds
+        setMotorInstruction(FORWARD_SPEED, 0, 0);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 1.3)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());

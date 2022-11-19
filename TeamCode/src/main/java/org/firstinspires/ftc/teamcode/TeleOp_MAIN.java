@@ -31,12 +31,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * This file contains an example of a Linear "OpMode".
+ * This file is our main OpMode for our drivers' section.
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
  * The names of OpModes appear on the menu of the FTC Driver Station.
  * When a selection is made from the menu, the corresponding OpMode is executed.
@@ -51,7 +52,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Holonomic drives provide the ability for the robot to move in three axes (directions) simultaneously.
  * Each motion axis is controlled by one Joystick axis.
  *
- * 1) Axial:    Driving forward and backward               Left-joystick Forward/Backward
+ * 1) Axial:    Driving forward and backward                Left-joystick Forward/Backward
  * 2) Lateral:  Strafing right and left                     Left-joystick Right and Left
  * 3) Yaw:      Rotating Clockwise and counter clockwise    Right-joystick Right and Left
  *
@@ -74,22 +75,22 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private Servo clawServo;
-    private Servo slideServo;
+    private CRServo slideServo;
 
     // Servo stuff
-    static final double INCREMENT_CLAW  =         0.03;     // amount to slew claw servo each CYCLE_MS cycle
+    static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each CYCLE_MS cycle
     static final double INCREMENT_SLIDE =         0.10;     // amount to slew slide servo
     static final int    CYCLE_MS        =           50;     // period of each cycle
     static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
     static final double MIN_POS         =          0.0;     // Minimum rotational position
-    static final double MAX_CLAW        =  135.0/270.0;     // Maximum rotational position for the claw
+    static final double MAX_CLAW        =  150.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
 
     double clawPos = (MIN_POS);  // Start at 0
-    double slidePos = (MIN_POS); // Start at 0
+    double slidePower = (MIN_POS); // Start at 0
     boolean clawActivated = false;
-    boolean ispressed = false;
+    boolean buttonAPressed = false;
     //Servo stuff end
 
 
@@ -103,7 +104,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         clawServo = hardwareMap.get(Servo.class, "claw_servo");
-        slideServo = hardwareMap.get(Servo.class, "slide_servo");
+        slideServo = hardwareMap.get(CRServo.class, "slide_servo");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -139,8 +140,8 @@ public class TeleOp_MAIN extends LinearOpMode {
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
 
-            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral =  gamepad1.left_stick_x;
+            double axial   =  -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            double lateral =   gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
             boolean lowerSlide = gamepad1.x;
             boolean raiseSlide = gamepad1.b;
@@ -176,11 +177,11 @@ public class TeleOp_MAIN extends LinearOpMode {
 
             // slew the servo, according to the rampUp (direction) variable controlled with A on the controller.
 
-            if (gamepad1.a && !ispressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+            if (gamepad1.a && !buttonAPressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
                 clawActivated = !clawActivated;
-                ispressed = true;
-            } else if (ispressed && !gamepad1.a) { //if no button was pressed and ispressed is true, then...
-                ispressed = false;
+                buttonAPressed = true;
+            } else if (buttonAPressed && !gamepad1.a) { //if no button was pressed and ispressed is true, then...
+                buttonAPressed = false;
             }
 
             // nothing needs to be done if no button is pressed and the ispressed is false, or if ispressed is true and the button is still being pressed
@@ -202,21 +203,20 @@ public class TeleOp_MAIN extends LinearOpMode {
 
             }
 
-            // Statement that lowers and raises the slide when X or B are pressed
-            if (raiseSlide) {
-                // Keep stepping up until we hit the max value.
-                slidePos += INCREMENT_SLIDE;
-                if (slidePos > MAX_CLAW ) {
-                    slidePos = MAX_POS;
-                }
+            // change power of slide servo
+            // power determines speed and rotation of servo
+            // power must be reversed to perform a raise instead of a lower
+            if(raiseSlide)
+            {
+                slidePower = -1;
             }
-            else if (lowerSlide) {
-                // Keep stepping down until we hit the min value.
-                slidePos -= INCREMENT_SLIDE;
-                if (slidePos < MIN_POS ) {
-                    slidePos = MIN_POS;
-                }
-
+            else if (lowerSlide)
+            {
+                slidePower = 1;
+            }
+            else
+            {
+                slidePower = 0;
             }
 
             // Display the current value
@@ -224,7 +224,7 @@ public class TeleOp_MAIN extends LinearOpMode {
             telemetry.addData(">", "Press Stop to end test." );
             // Set the servo to the new position and pause;
             clawServo.setPosition(clawPos);
-            slideServo.setPosition(slidePos);
+            slideServo.setPower(slidePower);
             sleep(CYCLE_MS);
             idle();
 

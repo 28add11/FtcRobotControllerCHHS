@@ -30,11 +30,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
+ * IMPORTANT NOTE: THIS PROGRAM IS INVALID FOR COMPETITION;
+ * PROOF OF CONCEPT TO SERVE FOR FUTURE USE ***
+ *
  * This file illustrates the concept of driving a path based on time.
  * The code is structured as a LinearOpMode
  *
@@ -55,7 +59,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @Autonomous(name="2: Lightbulbs", group="Robot")
-//@Disabled
+@Disabled
 public class parkZoneTwo extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
@@ -72,6 +76,8 @@ public class parkZoneTwo extends LinearOpMode {
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
+
+    //movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
     public void setMotorInstruction(double movementY, double movementX, double rotation) {
 
         double max;
