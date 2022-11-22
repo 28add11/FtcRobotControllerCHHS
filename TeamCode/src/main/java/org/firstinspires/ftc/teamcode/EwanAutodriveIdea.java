@@ -58,6 +58,7 @@ public class parkLeft extends LinearOpMode {
 
 
     ColorSensor colorSensor;    // Hardware Device Object
+    static float meterspersecond = 1;
 
 
 
@@ -190,15 +191,62 @@ public class parkLeft extends LinearOpMode {
         telemetry.addData("Hue", hsvValues[0]);
         telemetry.update();
 
-        // Step 1:  Strafe left for 1.5 Seconds
-        // ** Note: movementX has been reversed with negative sign, +ve values strafe right
-        // **       while -ve values strafe left
-        setMotorInstruction(0, -FORWARD_SPEED, 0);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
+
+        if(colorSensor.red() > colorSensor.green() && colorSensor.red() > colorSensor.blue()) //red is location 1
+        {
+            scenario = 0;
+
+
+            //drive left
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            //drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
         }
+        if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
+        {
+            scenario = 1;
+
+            //drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+        }
+        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
+        {
+            scenario = 2;
+
+            //drive right
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            //drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+        }
+
+        telemetry.addData("Scenario", scenario);
+
+        telemetry.update();
 
         // Step 2:  Stop
         setMotorInstruction(0, 0, 0);
