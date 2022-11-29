@@ -29,8 +29,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -42,10 +47,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The code also assumes an omni-wheel drivetrain
  *
  *   The desired path in this example is:
- *   - Strafe right for 1.5 seconds
- *   - Move forwards for 2.0 seconds
- *   - Spin around 360 degrees
- *   - Reverse for 2.0 seconds
+ *   - Strafe left for 1.5 seconds
+ *
  *
  *  The code is written in a simple form with no optimizations.
  *  However, there are several ways that this type of sequence could be streamlined,
@@ -54,9 +57,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Park Right", group="Robot")
+@Autonomous(name="ColorSensor Autodrive", group="Robot")
 //@Disabled
-public class parkRight extends LinearOpMode {
+public class colorSensorDrive extends LinearOpMode {
+
+
+    ColorSensor colorSensor;    // Hardware Device Object
+    static float meterspersecond = 1;
+
+
+
 
     // Declare OpMode members for each of the 4 motors.
     private DcMotor leftFrontDrive = null;
@@ -69,6 +79,8 @@ public class parkRight extends LinearOpMode {
 
     static final double     FORWARD_SPEED = 0.6;
     static final double     TURN_SPEED    = 0.5;
+
+    int scenario = 0; //0 is parking location 1, 1 is parking location 2, 2 is parking location three
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
@@ -117,13 +129,43 @@ public class parkRight extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+        //COLORSENSOR SETUP
+
+        // hsvValues is an array that will hold the hue, saturation, and value information.
+        float hsvValues[] = {0F,0F,0F};
+
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
+
+        // get a reference to the RelativeLayout so we can change the background
+        // color of the Robot Controller app to match the hue detected by the RGB sensor.
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+        // bPrevState and bCurrState represent the previous and current state of the button.
+        boolean bPrevState = false;
+        boolean bCurrState = false;
+
+        // bLedOn represents the state of the LED.
+        boolean bLedOn = true;
+
+        // get a reference to our ColorSensor object.
+        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color");
+
+        // Set the LED in the beginning
+        colorSensor.enableLed(bLedOn);
+
+        //COLORSENSOR SETUP
+
+
+
+
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
-
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -142,41 +184,93 @@ public class parkRight extends LinearOpMode {
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
-        // Step 1:  Strafe right for 1.5 Seconds
-        setMotorInstruction(0, FORWARD_SPEED, 0);
+
+        //drive forward
+        setMotorInstruction(FORWARD_SPEED, 0, 0);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 1.5)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
 
-        // STYLE POINTS *** will return back to step 1 position
-
-        // Step 2:  Move forward for 2.0 seconds
-        setMotorInstruction(FORWARD_SPEED, 0, 0);
+        // Step 2:  Stop
+        setMotorInstruction(0, 0, 0);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
-            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
+        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+
         }
 
-//        // Step 3:  Rotate CW for 2 seconds? (intention to 360)
-//        setMotorInstruction(0, 0, TURN_SPEED);
-//        runtime.reset();
-//        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
-//            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-//            telemetry.update();
-//        }
 
-        // Step 4:  Move backwards for 2.0 seconds
-        setMotorInstruction(-FORWARD_SPEED, 0, 0);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
-            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
+        // convert the RGB values to HSV values.
+        Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+
+        // send the info back to driver station using telemetry function.
+        telemetry.addData("LED", bLedOn ? "On" : "Off");
+        telemetry.addData("Clear", colorSensor.alpha());
+        telemetry.addData("Red  ", colorSensor.red());
+        telemetry.addData("Green", colorSensor.green());
+        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+        telemetry.update();
+
+
+        if(colorSensor.red() > colorSensor.green() && colorSensor.red() > colorSensor.blue()) //red is location 1
+        {
+            scenario = 0;
+
+
+            //drive left
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.25)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            /*//drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }*/
+        }
+        if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
+        {
+            scenario = 1;
+
+            /*//drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }*/
+        }
+        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
+        {
+            scenario = 2;
+
+            //drive right
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.25)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            /*//drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }*/
         }
 
-        // Step 5:  Stop
+        telemetry.addData("Scenario", scenario);
+
+        telemetry.update();
+
+        // Step 2:  Stop
         setMotorInstruction(0, 0, 0);
         telemetry.addData("Path", "Complete");
         telemetry.update();

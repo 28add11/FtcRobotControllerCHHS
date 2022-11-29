@@ -42,7 +42,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The code also assumes an omni-wheel drivetrain
  *
  *   The desired path in this example is:
- *   - Strafe left for 1.5 seconds
+ *   - Strafe left for 1.4 seconds
+ *   - Move forwards for 2.0 seconds
+ *   - Spin around 360 degrees
+ *   - Reverse for 2.0 seconds
  *
  *
  *  The code is written in a simple form with no optimizations.
@@ -139,17 +142,43 @@ public class parkLeft extends LinearOpMode {
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
-        // Step 1:  Strafe left for 1.5 Seconds
+        // Step 1:  Strafe left for 1.4 Seconds
         // ** Note: movementX has been reversed with negative sign, +ve values strafe right
         // **       while -ve values strafe left
         setMotorInstruction(0, -FORWARD_SPEED, 0);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+        while (opModeIsActive() && (runtime.seconds() < 1.4)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
 
-        // Step 2:  Stop
+        // STYLE POINTS ***
+
+        // Step 2:  Move forward for 2.0 seconds
+        setMotorInstruction(FORWARD_SPEED, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
+            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+        }
+
+//        // Step 3:  Rotate CW for 2 seconds? (intention to 360)
+//        setMotorInstruction(0, 0, TURN_SPEED);
+//        runtime.reset();
+//        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
+//            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+//            telemetry.update();
+//        }
+
+        // Step 4:  Move backwards for 2.0 seconds
+        setMotorInstruction(-FORWARD_SPEED, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
+            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+        }
+
+        // Step 5:  Stop
         setMotorInstruction(0, 0, 0);
         telemetry.addData("Path", "Complete");
         telemetry.update();

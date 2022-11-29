@@ -83,7 +83,7 @@ public class TeleOp_MAIN extends LinearOpMode {
     static final int    CYCLE_MS        =           50;     // period of each cycle
     static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
     static final double MIN_POS         =          0.0;     // Minimum rotational position
-    static final double MAX_CLAW        =  150.0/270.0;     // Maximum rotational position for the claw
+    static final double MAX_CLAW        =  210.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
 
@@ -218,6 +218,9 @@ public class TeleOp_MAIN extends LinearOpMode {
             {
                 slidePower = 0;
             }
+
+//            // if we switch the controls to the triggers, this is all we need
+//            slidePower = raiseSlide - lowerSlide;
 
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", clawPos);
