@@ -222,7 +222,7 @@ public class colorSensorDrive extends LinearOpMode {
             //drive left
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.25)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.12)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -253,7 +253,7 @@ public class colorSensorDrive extends LinearOpMode {
             //drive right
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.25)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.12)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
