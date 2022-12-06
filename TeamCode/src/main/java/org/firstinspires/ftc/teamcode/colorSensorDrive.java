@@ -222,7 +222,13 @@ public class colorSensorDrive extends LinearOpMode {
             //drive left
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.12)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.25)) {
+                telemetry.addData("LED", bLedOn ? "On" : "Off");
+                telemetry.addData("Clear", colorSensor.alpha());
+                telemetry.addData("Red  ", colorSensor.red());
+                telemetry.addData("Green", colorSensor.green());
+                telemetry.addData("Blue ", colorSensor.blue());
+                telemetry.addData("Hue", hsvValues[0]);
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -237,6 +243,14 @@ public class colorSensorDrive extends LinearOpMode {
         if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
         {
             scenario = 1;
+
+            telemetry.addData("LED", bLedOn ? "On" : "Off");
+            telemetry.addData("Clear", colorSensor.alpha());
+            telemetry.addData("Red  ", colorSensor.red());
+            telemetry.addData("Green", colorSensor.green());
+            telemetry.addData("Blue ", colorSensor.blue());
+            telemetry.addData("Hue", hsvValues[0]);
+            telemetry.update();
 
             /*//drive forward
             setMotorInstruction(FORWARD_SPEED, 0, 0);
@@ -253,7 +267,13 @@ public class colorSensorDrive extends LinearOpMode {
             //drive right
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.12)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.25)) {
+                telemetry.addData("LED", bLedOn ? "On" : "Off");
+                telemetry.addData("Clear", colorSensor.alpha());
+                telemetry.addData("Red  ", colorSensor.red());
+                telemetry.addData("Green", colorSensor.green());
+                telemetry.addData("Blue ", colorSensor.blue());
+                telemetry.addData("Hue", hsvValues[0]);
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
