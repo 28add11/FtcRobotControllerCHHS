@@ -88,6 +88,7 @@ public class TeleOp_MAIN extends LinearOpMode {
 
     // Define class members
 
+
     double clawPos = (MIN_POS);  // Start at 0
     double slidePower = (MIN_POS); // Start at 0
     boolean clawActivated = false;
