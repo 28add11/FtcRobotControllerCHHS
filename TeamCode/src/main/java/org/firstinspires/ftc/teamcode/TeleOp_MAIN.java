@@ -75,7 +75,8 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private Servo clawServo;
-    private CRServo slideServo;
+    private CRServo slideServo1;
+    private CRServo slideServo2;
 
     // Servo stuff
     static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each CYCLE_MS cycle
@@ -104,7 +105,8 @@ public class TeleOp_MAIN extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         clawServo = hardwareMap.get(Servo.class, "claw_servo");
-        slideServo = hardwareMap.get(CRServo.class, "slide_servo");
+        slideServo1 = hardwareMap.get(CRServo.class, "slide_servo1");
+        slideServo2 = hardwareMap.get(CRServo.class, "slide_servo2");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -227,7 +229,9 @@ public class TeleOp_MAIN extends LinearOpMode {
             telemetry.addData(">", "Press Stop to end test." );
             // Set the servo to the new position and pause;
             clawServo.setPosition(clawPos);
-            slideServo.setPower(slidePower);
+            slideServo1.setPower(slidePower);
+            slideServo2.setPower(-slidePower);
+
             sleep(CYCLE_MS);
             idle();
 
