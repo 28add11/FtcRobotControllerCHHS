@@ -85,7 +85,7 @@ public class TeleOp_MAIN extends LinearOpMode {
     static final int    CYCLE_MS        =           50;     // period of each cycle
     static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
     static final double MIN_POS         =          0.0;     // Minimum rotational position
-    static final double MAX_CLAW        =  210.0/270.0;     // Maximum rotational position for the claw
+    static final double MAX_CLAW        =  35.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
 
@@ -123,8 +123,8 @@ public class TeleOp_MAIN extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        slideServoA.setDirection(DcMotorSimple.Direction.REVERSE);
-        slideServoB.setDirection(DcMotorSimple.Direction.REVERSE);
+        slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -139,6 +139,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         waitForStart();
 
 
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double max;
@@ -146,7 +147,7 @@ public class TeleOp_MAIN extends LinearOpMode {
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
 
             double axial   =  -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral =   gamepad1.left_stick_x;
+            double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
             double leftTrigger = gamepad1.left_trigger;
             double rightTrigger = gamepad1.right_trigger;

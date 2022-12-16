@@ -181,8 +181,8 @@ public class colorSensorDrive extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        slideServoA.setDirection(DcMotorSimple.Direction.REVERSE);
-        slideServoB.setDirection(DcMotorSimple.Direction.REVERSE);
+        slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //
@@ -197,9 +197,9 @@ public class colorSensorDrive extends LinearOpMode {
         Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
 
         //drive forward
-        setMotorInstruction(FORWARD_SPEED, 0, 0);
         slideServoA.setPower(1);
         slideServoB.setPower(1);
+        setMotorInstruction(FORWARD_SPEED, 0, 0);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 1.5)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
@@ -302,6 +302,7 @@ public class colorSensorDrive extends LinearOpMode {
 
         // Step 2:  Stop
         setMotorInstruction(0, 0, 0);
+        colorSensor.enableLed(false);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);
