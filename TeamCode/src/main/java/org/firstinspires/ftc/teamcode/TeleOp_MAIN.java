@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -75,8 +76,8 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
     private Servo clawServo;
-    private CRServo slideServo1;
-    private CRServo slideServo2;
+    private CRServo slideServoA;
+    private CRServo slideServoB;
 
     // Servo stuff
     static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each CYCLE_MS cycle
@@ -87,7 +88,6 @@ public class TeleOp_MAIN extends LinearOpMode {
     static final double MAX_CLAW        =  210.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
-
 
     double clawPos = (MIN_POS);  // Start at 0
     double slidePower = (MIN_POS); // Start at 0
@@ -106,8 +106,8 @@ public class TeleOp_MAIN extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
         clawServo = hardwareMap.get(Servo.class, "claw_servo");
-        slideServo1 = hardwareMap.get(CRServo.class, "slide_servo1");
-        slideServo2 = hardwareMap.get(CRServo.class, "slide_servo2");
+        slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
+        slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -123,6 +123,8 @@ public class TeleOp_MAIN extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        slideServoA.setDirection(DcMotorSimple.Direction.REVERSE);
+        slideServoB.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -146,6 +148,8 @@ public class TeleOp_MAIN extends LinearOpMode {
             double axial   =  -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double lateral =   gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
+            double leftTrigger = gamepad1.left_trigger;
+            double rightTrigger = gamepad1.right_trigger;
             boolean lowerSlide = gamepad1.x;
             boolean raiseSlide = gamepad1.b;
 
@@ -209,30 +213,32 @@ public class TeleOp_MAIN extends LinearOpMode {
             // change power of slide servo
             // power determines speed and rotation of servo
             // power must be reversed to perform a raise instead of a lower
-            if(raiseSlide)
-            {
-                slidePower = -1;
-            }
-            else if (lowerSlide)
-            {
+//            if(raiseSlide)
+//            {
+//                slidePower = -1;
+//            }
+//            else if (lowerSlide)
+//            {
+//                slidePower = 1;
+//            }
+//            else
+//            {
+//                slidePower = 0;
+//            }
+
+            // if we switch the controls to the triggers, this is all we need
+            slidePower = rightTrigger - leftTrigger + (raiseSlide ? 1:0) - (lowerSlide ? 1:0);
+            if (slidePower > 1) {
                 slidePower = 1;
             }
-            else
-            {
-                slidePower = 0;
-            }
-
-//            // if we switch the controls to the triggers, this is all we need
-//            slidePower = raiseSlide - lowerSlide;
 
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", clawPos);
             telemetry.addData(">", "Press Stop to end test." );
             // Set the servo to the new position and pause;
             clawServo.setPosition(clawPos);
-            slideServo1.setPower(slidePower);
-            slideServo2.setPower(-slidePower);
-
+            slideServoA.setPower(slidePower);
+            slideServoB.setPower(slidePower);
             sleep(CYCLE_MS);
             idle();
 
