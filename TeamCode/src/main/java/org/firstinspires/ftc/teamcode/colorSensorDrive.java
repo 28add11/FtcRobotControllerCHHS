@@ -196,8 +196,8 @@ public class colorSensorDrive extends LinearOpMode {
         // convert the RGB values to HSV values.
         Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
 
-        //drive forward
-        setMotorInstruction(FORWARD_SPEED, 0, 0);
+        //drive left
+        setMotorInstruction(0, -FORWARD_SPEED, 0);
         slideServoA.setPower(1);
         slideServoB.setPower(1);
         runtime.reset();
@@ -229,8 +229,8 @@ public class colorSensorDrive extends LinearOpMode {
             scenario = 0;
 
 
-            //drive left
-            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            //drive backward
+            setMotorInstruction(-FORWARD_SPEED, 0, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 1.25)) {
                 telemetry.addData("LED", bLedOn ? "On" : "Off");
@@ -274,8 +274,8 @@ public class colorSensorDrive extends LinearOpMode {
         {
             scenario = 2;
 
-            //drive right
-            setMotorInstruction(0, FORWARD_SPEED, 0);
+            //drive forward
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 1.25)) {
                 telemetry.addData("LED", bLedOn ? "On" : "Off");
