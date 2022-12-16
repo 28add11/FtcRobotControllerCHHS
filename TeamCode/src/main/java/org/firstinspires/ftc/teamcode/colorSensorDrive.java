@@ -269,9 +269,7 @@ public class colorSensorDrive extends LinearOpMode {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }*/
-        }
-
-        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
+        }        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
         {
             scenario = 2;
 
