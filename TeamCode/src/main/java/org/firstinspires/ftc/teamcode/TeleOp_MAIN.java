@@ -139,10 +139,10 @@ public class TeleOp_MAIN extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-
-            double axial   =  -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral =   gamepad1.left_stick_x;
-            double yaw     =  gamepad1.right_stick_x;
+            //fancy math stuff is for non-linear accel
+            double axial   =  -(gamepad1.left_stick_y * (Math.pow(gamepad1.left_stick_y, 2)));  // Note: pushing stick forward gives negative value
+            double lateral =   (gamepad1.left_stick_x * (Math.pow(gamepad1.left_stick_x, 2)));
+            double yaw     =  (gamepad1.right_stick_x * (Math.pow(gamepad1.right_stick_x, 2)));
             boolean lowerSlide = gamepad1.x;
             boolean raiseSlide = gamepad1.b;
 
