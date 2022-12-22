@@ -216,7 +216,7 @@ public class colorSensorDrive extends LinearOpMode {
 //        slideServoA.setPower(1);
 //        slideServoB.setPower(1);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+        while (opModeIsActive() && (runtime.seconds() < 1.0)) {
             displayColorTelemetry();
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
@@ -239,7 +239,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Push the cone and return
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.0)) {
                 displayColorTelemetry();
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
@@ -255,7 +255,7 @@ public class colorSensorDrive extends LinearOpMode {
             //drive backward
             setMotorInstruction(-FORWARD_SPEED, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.1)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
                 displayColorTelemetry();
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
@@ -272,21 +272,14 @@ public class colorSensorDrive extends LinearOpMode {
         {
             scenario = 1;
 
-            telemetry.addData("LED", bLedOn ? "On" : "Off");
-            telemetry.addData("Clear", colorSensor.alpha());
-            telemetry.addData("Red  ", colorSensor.red());
-            telemetry.addData("Green", colorSensor.green());
-            telemetry.addData("Blue ", colorSensor.blue());
-            telemetry.addData("Hue", hsvValues[0]);
-            telemetry.update();
-
-            /*//drive forward
-            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                displayColorTelemetry();
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
-            }*/
+            }
+
         }
 
         if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
@@ -296,7 +289,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Push the cone and return
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.0)) {
                 displayColorTelemetry();
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
@@ -312,7 +305,7 @@ public class colorSensorDrive extends LinearOpMode {
             //drive forward
             setMotorInstruction(FORWARD_SPEED, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.1)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
                 displayColorTelemetry();
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
