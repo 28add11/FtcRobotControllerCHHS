@@ -197,7 +197,10 @@ public class PoleDetectionOpMode extends LinearOpMode
          * constantly allocating and freeing large chunks of memory.
          */
 
-        Mat poles = new Mat();
+        //Note: I have literally no clue what various qualities mats should have, I feel like you might want to make them a volatile but the docs do it this way so ¯\_(ツ)_/¯
+
+        Mat poles = new Mat(); //Final output mat to be displayed on screen, THIS IS NOT DATA FOR THE OPMODE, OPMODE DATA WILL BE GATHERED IN THE PIPELINE!
+        Mat HSVsource = new Mat(); //HSV conversion of input mat
 
         @Override
         public Mat processFrame(Mat input)
@@ -210,7 +213,10 @@ public class PoleDetectionOpMode extends LinearOpMode
              * it to another Mat.
              */
 
-            
+
+            //UNTESTED AND THE DOCS WERE BAD!!!!
+            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_RGB2HSV); //Convert RGB colorspace of input into HSV
+            Core.inRange(HSVsource, new Scalar(38, 32, 39), new Scalar(78, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 1 if it is, 0 if it isnt
 
             /**
              * NOTE: to see how to get data from your pipeline to your OpMode as well as how
