@@ -217,6 +217,7 @@ public class PoleDetectionOpMode extends LinearOpMode
             /* Basic documentation can be found at docs.opencv.org, however they are a bit hard to understand. If any help is needed reach out to 28+11#9929 On discord.
              * 
              * If anyone is maintaining this repo in the future when I have left crecent please sub in your own discord tag.
+             *
              */
 
             //UNTESTED AND THE DOCS WERE BAD!!!!
@@ -225,12 +226,17 @@ public class PoleDetectionOpMode extends LinearOpMode
             /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
             Core.inRange(HSVsource, new Scalar(38, 32, 39), new Scalar(78, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
 
-            Imgproc.findContours(poles, java.util.List<Core.MatOfPoint> contours, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(poles, java.util.List<Core.MatOfPoint> contours, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
 
-            
+            java.util.List<Core.MatOfPoint> poly = new java.util.ArrayList<Core.MatOfPoint>(); //possible memory leak due to this list? idk this is alpha
 
             for (java.util.List<Core.MatOfPoint> cont : contours) { //java makes no sense and I have no clue if this works but hey it should i hope haha... Nathaniel or Ewan please review this
+
+                    Imgproc.approxPolyDP​(cont, poly, 0.1, true); //aproximates a polygon for the contours. the third argument is sensitivity, change if we have absurdly high polygon sides
                     
+                    if (poly.size() == 4) {
+                        //do something...
+                    }
             }
 
 
