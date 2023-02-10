@@ -233,14 +233,14 @@ public class PoleDetectionOpMode extends LinearOpMode
 
             Imgproc.findContours(poles, contours, hirearchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
 
-            java.util.List<MatOfPoint> poly = new java.util.ArrayList<MatOfPoint>(); //possible memory leak due to this list? idk this is alpha
+            MatOfPoint2f poly = new MatOfPoint2f();
 
 
-            for (MatOfPoint cont : contours) { //java makes no sense and I have no clue if this works but hey it should i hope haha... Nathaniel or Ewan please review this
+            for (MatOfPoint2f cont : contours) { //java makes no sense and I have no clue if this works but hey it should i hope haha... Nathaniel or Ewan please review this
 
                     Imgproc.approxPolyDP(cont, poly, 0.1, true); //aproximates a polygon for the contours. the third argument is sensitivity, change if we have absurdly high polygon sides
                     
-                    if (poly.size() == 4) {
+                    if (poly.size(4) == 4) {
                         //do something...
                         continue;
                     }
