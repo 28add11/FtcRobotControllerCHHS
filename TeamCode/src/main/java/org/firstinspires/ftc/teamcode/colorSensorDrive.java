@@ -218,11 +218,27 @@ public class colorSensorDrive extends LinearOpMode {
         {
             scenario = 0;
 
+            //this code is to solve the cone getting stuck in the robots wheels.
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            //this code is to solve the cone getting stuck in the robots wheels.
+
+
 
             //drive left
             setMotorInstruction(-FORWARD_SPEED, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.12)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.22)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -250,10 +266,27 @@ public class colorSensorDrive extends LinearOpMode {
         {
             scenario = 2;
 
+            //this code is to solve the cone getting stuck in the robots wheels.
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            //this code is to solve the cone getting stuck in the robots wheels.
+
+
+
             //drive right
             setMotorInstruction(FORWARD_SPEED, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.12)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.22)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
