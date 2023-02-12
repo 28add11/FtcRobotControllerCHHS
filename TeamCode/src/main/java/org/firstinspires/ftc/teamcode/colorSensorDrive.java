@@ -47,7 +47,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * The code also assumes an omni-wheel drivetrain
  *
  *   The desired path in this example is:
- *   - Strafe left for 1.5 seconds
+ *   - Drive forward to detect cone
+ *   - Determine color
+ *   - Push cone away (forward and back)
+ *   - If RED, park left
+ *   - if BLUE, park right
  *
  *
  *  The code is written in a simple form with no optimizations.
@@ -63,7 +67,7 @@ public class colorSensorDrive extends LinearOpMode {
 
 
     ColorSensor colorSensor;    // Hardware Device Object
-    static float meterspersecond = 1;
+//    static float meterspersecond = 1;
 
 
 
@@ -78,14 +82,15 @@ public class colorSensorDrive extends LinearOpMode {
 
 
     static final double     FORWARD_SPEED = 0.6;
-    static final double     TURN_SPEED    = 0.5;
+//    static final double     TURN_SPEED    = 0.5;
 
     int scenario = 0; //0 is parking location 1, 1 is parking location 2, 2 is parking location three
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
 
-    //movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
+    // movementY is forward-back movement (negative backwards positive forwards),
+    // movementX is left-right movement (negative left positive right).
     public void setMotorInstruction(double movementY, double movementX, double rotation) {
 
         double max;
@@ -146,14 +151,9 @@ public class colorSensorDrive extends LinearOpMode {
         boolean bPrevState = false;
         boolean bCurrState = false;
 
-        // bLedOn represents the state of the LED.
-        boolean bLedOn = true;
 
         // get a reference to our ColorSensor object.
         colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color");
-
-        // Set the LED in the beginning
-        colorSensor.enableLed(bLedOn);
 
         //COLORSENSOR SETUP
 
@@ -185,7 +185,7 @@ public class colorSensorDrive extends LinearOpMode {
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
 
-        //drive forward
+        // Drive forward
         setMotorInstruction(0, -FORWARD_SPEED, 0);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 1.5)) {
@@ -205,7 +205,6 @@ public class colorSensorDrive extends LinearOpMode {
         Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
 
         // send the info back to driver station using telemetry function.
-        telemetry.addData("LED", bLedOn ? "On" : "Off");
         telemetry.addData("Clear", colorSensor.alpha());
         telemetry.addData("Red  ", colorSensor.red());
         telemetry.addData("Green", colorSensor.green());
@@ -214,24 +213,43 @@ public class colorSensorDrive extends LinearOpMode {
         telemetry.update();
 
 
+        // Park RED
         if(colorSensor.red() > colorSensor.green() && colorSensor.red() > colorSensor.blue()) //red is location 1
         {
             scenario = 0;
 
-            //this code is to solve the cone getting stuck in the robots wheels.
+            // In order to prevent the cones from getting stuck in the wheels, this code
+            // pushes the cone forward and moves back to its original spot
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Run it back
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
-            //this code is to solve the cone getting stuck in the robots wheels.
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
 
 
 
@@ -242,61 +260,65 @@ public class colorSensorDrive extends LinearOpMode {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
-            /*//drive forward
-            setMotorInstruction(FORWARD_SPEED, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }*/
+
         }
+
+        // Park GREEN
         if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
         {
             scenario = 1;
 
-            /*//drive forward
-            setMotorInstruction(FORWARD_SPEED, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }*/
+            // Do nothing lmao
         }
+
+        // Park BLUE
         if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
         {
             scenario = 2;
 
-            //this code is to solve the cone getting stuck in the robots wheels.
+            // In order to prevent the cones from getting stuck in the wheels, this code
+            // pushes the cone forward and moves back to its original spot
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Run it back
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
-            //this code is to solve the cone getting stuck in the robots wheels.
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
 
 
 
-            //drive right
+            // Drive right
             setMotorInstruction(FORWARD_SPEED, 0, 0);
             runtime.reset();
             while (opModeIsActive() && (runtime.seconds() < 1.3)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
-            /*//drive forward
-            setMotorInstruction(FORWARD_SPEED, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }*/
+
         }
 
         telemetry.addData("Scenario", scenario);

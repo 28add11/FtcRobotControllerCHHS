@@ -86,7 +86,7 @@ public class TeleOp_MAIN extends LinearOpMode {
     static final int    CYCLE_MS        =           50;     // period of each cycle
     static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
     static final double MIN_POS         =          0.0;     // Minimum rotational position
-    static final double MAX_CLAW        =  35.0/270.0;     // Maximum rotational position for the claw
+    static final double MAX_CLAW        =   45.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
 
