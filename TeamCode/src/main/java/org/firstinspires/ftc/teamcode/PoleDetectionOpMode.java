@@ -233,9 +233,11 @@ public class PoleDetectionOpMode extends LinearOpMode
 
             Imgproc.findContours(poles, contours, hirearchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
 
-            MatOfPoint2f poly = new MatOfPoint2f();
 
+            Imgproc.drawContours(HSVsource, contours, -1, new Scalar(255, 0, 0), 2);
+            //MatOfPoint2f poly = new MatOfPoint2f();
 
+            /*
             for (MatOfPoint2f cont : contours) { //java makes no sense and I have no clue if this works but hey it should i hope haha... Nathaniel or Ewan please review this
 
                     Imgproc.approxPolyDP(cont, poly, 0.1, true); //aproximates a polygon for the contours. the third argument is sensitivity, change if we have absurdly high polygon sides
@@ -246,6 +248,7 @@ public class PoleDetectionOpMode extends LinearOpMode
                     }
             }
 
+            */
 
             /**
              * NOTE: to see how to get data from your pipeline to your OpMode as well as how
@@ -253,7 +256,7 @@ public class PoleDetectionOpMode extends LinearOpMode
              * tapped, please see {@link PipelineStageSwitchingExample}
              */
 
-            return poles;
+            return HSVsource;
         }
 
         @Override
