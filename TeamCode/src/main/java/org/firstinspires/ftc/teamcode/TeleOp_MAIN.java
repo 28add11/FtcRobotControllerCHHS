@@ -78,6 +78,7 @@ public class TeleOp_MAIN extends LinearOpMode {
     private Servo clawServo;
     private CRServo slideServoA;
     private CRServo slideServoB;
+    private CRServo slideServoC;
 
     // Servo stuff
     static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each CYCLE_MS cycle
@@ -95,6 +96,46 @@ public class TeleOp_MAIN extends LinearOpMode {
     boolean buttonAPressed = false;
     //Servo stuff end
 
+    //movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
+    public void setMotorInstruction(double movementY, double movementX, double rotation) {
+
+        double max;
+
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        double axial = movementY;
+        double lateral =  movementX;
+        double yaw =  rotation;
+
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+        double leftFrontPower  = axial + lateral + yaw;
+        double rightFrontPower = axial - lateral - yaw;
+        double leftBackPower   = axial - lateral + yaw;
+        double rightBackPower  = axial + lateral - yaw;
+
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(rightBackPower));
+
+        if (max > 1.0) {
+            leftFrontPower  /= max;
+            rightFrontPower /= max;
+            leftBackPower   /= max;
+            rightBackPower  /= max;
+        }
+
+        // Send calculated power to wheels
+        leftFrontDrive.setPower(leftFrontPower);
+        rightFrontDrive.setPower(rightFrontPower);
+        leftBackDrive.setPower(leftBackPower);
+        rightBackDrive.setPower(rightBackPower);
+
+        telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
+        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+        //telemetry.update();
+    }
 
     @Override
     public void runOpMode() {
@@ -108,6 +149,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         clawServo = hardwareMap.get(Servo.class, "claw_servo");
         slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
         slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
+        slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -125,6 +167,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
         slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -142,45 +185,18 @@ public class TeleOp_MAIN extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            double max;
 
-            // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-
-            //fancy math stuff is for non-linear accel
-            double axial   =  -(gamepad1.left_stick_y * (Math.pow(gamepad1.left_stick_y, 2)));  // Note: pushing stick forward gives negative value
-            double lateral =   (gamepad1.left_stick_x * (Math.pow(gamepad1.left_stick_x, 2)));
-            double yaw     =  (gamepad1.right_stick_x * (Math.pow(gamepad1.right_stick_x, 2)));
-            double leftTrigger = gamepad1.left_trigger;
+            double movementY    =  -Math.pow(gamepad1.left_stick_y, 3);  // Note: pushing stick forward gives negative value
+            double movementX    =  Math.pow(gamepad1.left_stick_x, 3);
+            double rotation     =  Math.pow(gamepad1.right_stick_x, 3);
+            double leftTrigger  = gamepad1.left_trigger;
             double rightTrigger = gamepad1.right_trigger;
-            boolean lowerSlide = gamepad1.x;
-            boolean raiseSlide = gamepad1.b;
-
-            // Combine the joystick requests for each axis-motion to determine each wheel's power.
-            // Set up a variable for each drive wheel to save the power level for telemetry.
-            double leftFrontPower  = axial + lateral + yaw;
-            double rightFrontPower = axial - lateral - yaw;
-            double leftBackPower   = axial - lateral + yaw;
-            double rightBackPower  = axial + lateral - yaw;
-
-            // Normalize the values so no wheel power exceeds 100%
-            // This ensures that the robot maintains the desired motion.
-            max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
-            max = Math.max(max, Math.abs(leftBackPower));
-            max = Math.max(max, Math.abs(rightBackPower));
-
-            if (max > 1.0) {
-                leftFrontPower  /= max;
-                rightFrontPower /= max;
-                leftBackPower   /= max;
-                rightBackPower  /= max;
-            }
-
-
-            // Send calculated power to wheels
-            leftFrontDrive.setPower(leftFrontPower);
-            rightFrontDrive.setPower(rightFrontPower);
-            leftBackDrive.setPower(leftBackPower);
-            rightBackDrive.setPower(rightBackPower);
+            boolean lowerSlide  = gamepad1.x;
+            boolean raiseSlide  = gamepad1.b;
+            boolean clickRight  = gamepad1.dpad_right;
+            boolean clickLeft   = gamepad1.dpad_left;
+            boolean clickUp     = gamepad1.dpad_up;
+            boolean clickDown   = gamepad1.dpad_down;
 
             // SERVO STUFF
 
@@ -212,27 +228,21 @@ public class TeleOp_MAIN extends LinearOpMode {
 
             }
 
-            // change power of slide servo
-            // power determines speed and rotation of servo
-            // power must be reversed to perform a raise instead of a lower
-//            if(raiseSlide)
-//            {
-//                slidePower = -1;
-//            }
-//            else if (lowerSlide)
-//            {
-//                slidePower = 1;
-//            }
-//            else
-//            {
-//                slidePower = 0;
-//            }
-
             // if we switch the controls to the triggers, this is all we need
             slidePower = rightTrigger - leftTrigger + (raiseSlide ? 1:0) - (lowerSlide ? 1:0);
             if (slidePower > 1) {
                 slidePower = 1;
             }
+
+            // Motor Control
+            setMotorInstruction(movementY, movementX, rotation);
+            if (clickUp == true || clickDown == true) {
+                setMotorInstruction(0.2*(clickUp?1:0 - (clickDown?1:0)), 0, 0);
+            }
+            if (clickRight == true || clickLeft == true) {
+                setMotorInstruction(0, 0.2*(clickRight?1:0 - (clickLeft?1:0)), 0);
+            }
+
 
             // Display the current value
             telemetry.addData("Servo Position", "%5.2f", clawPos);
@@ -241,6 +251,7 @@ public class TeleOp_MAIN extends LinearOpMode {
             clawServo.setPosition(clawPos);
             slideServoA.setPower(slidePower);
             slideServoB.setPower(slidePower);
+            slideServoC.setPower(slidePower);
             sleep(CYCLE_MS);
             idle();
 
@@ -248,8 +259,6 @@ public class TeleOp_MAIN extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
-            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.update();
 
         }
