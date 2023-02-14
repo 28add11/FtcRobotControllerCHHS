@@ -67,9 +67,18 @@ public class colorSensorDrive extends LinearOpMode {
 
 
     ColorSensor colorSensor;    // Hardware Device Object
-//    static float meterspersecond = 1;
 
 
+    //coordinates navigation system variables
+    static float meterspersecond = 0.68/1.5; //meters per second
+    static float unitspersecond = meterspersecond/0.6096; //field squares per second
+
+    float fieldmaxXmeters = 3.6576; //12FT BY 12FT
+    float fieldmaxYeters = 3.6576;
+    float fieldCoordXmax = 6; //each fieldcoordinate unit (one square) is 0.6096 meters
+    float fieldCoordYmax = 6;
+    float currentPosX = 0;
+    float currentPosY = 0;
 
 
     // Declare OpMode members for each of the 4 motors.
@@ -131,8 +140,82 @@ public class colorSensorDrive extends LinearOpMode {
         telemetry.update();
     }
 
+    //Y is arena forward arena back, X is arena left arena right.
+    public void driveToPos(float coordX, float coordY)
+    {
+        float drivedistanceX = coordX - currentPosX;
+        float drivedistanceY = coordY - currentPosY;
+
+        float drivetimeX = drivedistanceX/unitspersecond;
+        float drivetimeY = drivedistanceY/unitspersecond;
+
+        if(drivetimeY < 0)
+        {
+            setMotorInstruction(0, FORWARD_SPEED, 0); //drives in Y negative direction for drivetimeY
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < -drivetimeY)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            // Step 2:  Stop
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+            }
+        }
+        else
+        {
+            setMotorInstruction(0, -FORWARD_SPEED, 0); //drives in Y positive direction for drivetimeY
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < drivetimeY)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            // Step 2:  Stop
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+            }
+        }
+
+        if(drivetimeX < 0)
+        {
+            setMotorInstruction(0, FORWARD_SPEED, 0); //drives in X negative  direction for drivetimeY
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < -drivetimeX)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            // Step 2:  Stop
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+            }
+        }
+        else
+        {
+            setMotorInstruction(0, -FORWARD_SPEED, 0); //drives in X positive direction for drivetimeY
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < drivetimeX)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            // Step 2:  Stop
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+            }
+        }
+
+    }
+
     @Override
-    public void runOpMode() {
+    public void runOpMode()
+    {
 
         //COLORSENSOR SETUP
 
@@ -160,6 +243,7 @@ public class colorSensorDrive extends LinearOpMode {
 
 
 
+
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
@@ -175,6 +259,14 @@ public class colorSensorDrive extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
+
+
+
+
+
+
+
+
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //
         telemetry.update();
@@ -186,19 +278,8 @@ public class colorSensorDrive extends LinearOpMode {
 
 
         // Drive forward
-        setMotorInstruction(0, -FORWARD_SPEED, 0);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }
+        driveToPos(float 0, float 1);
 
-        // Step 2:  Stop
-        setMotorInstruction(0, 0, 0);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-
-        }
 
 
         // convert the RGB values to HSV values.
