@@ -202,8 +202,9 @@ public class PoleDetectionOpMode extends LinearOpMode
         //Note: I have literally no clue what various qualities mats should have, I feel like you might want to make them a volatile but the docs do it this way so ¯\_(ツ)_/¯
 
         Mat poles = new Mat(); //Final output mat to be displayed on screen, THIS IS NOT DATA FOR THE OPMODE, OPMODE DATA WILL BE GATHERED IN THE PIPELINE!
-        Mat HSVsource = new Mat(); //HSV conversion of input mat
+        Mat HSVsource = new Mat();
         Mat hirearchy = new Mat(); //It needs this for some reason
+        Mat output = new Mat();
 
         @Override
         public Mat processFrame(Mat input)
@@ -223,6 +224,8 @@ public class PoleDetectionOpMode extends LinearOpMode
              *
              */
 
+            output = input.clone();
+
             //UNTESTED AND THE DOCS WERE BAD!!!!
             Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_RGB2HSV); //Convert RGB colorspace of input into HSV
 
@@ -234,21 +237,28 @@ public class PoleDetectionOpMode extends LinearOpMode
             Imgproc.findContours(poles, contours, hirearchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
 
 
-            Imgproc.drawContours(HSVsource, contours, -1, new Scalar(255, 0, 0), 2);
-            //MatOfPoint2f poly = new MatOfPoint2f();
+            Imgproc.drawContours(output, contours, -1, new Scalar(255, 0, 0), 2);
+            
+            //I got help with the following code from LHACK4142#7686 on discord, many thanks to him!
 
-            /*
-            for (MatOfPoint2f cont : contours) { //java makes no sense and I have no clue if this works but hey it should i hope haha... Nathaniel or Ewan please review this
 
-                    Imgproc.approxPolyDP(cont, poly, 0.1, true); //aproximates a polygon for the contours. the third argument is sensitivity, change if we have absurdly high polygon sides
-                    
-                    if (poly.size(4) == 4) {
-                        //do something...
-                        continue;
-                    }
+            //finds the biggest pole, ie the closest, since it will take up the largest portion of the FOV
+            MatOfPoint biggestContour = contours.get(0); // this is because using the default constructor sets biggestContour up in a bad way
+
+            for (MatOfPoint curContour : contours) {
+                if (Imgproc.contourArea(curContour) > Imgproc.contourArea(biggestContour)) {
+                    biggestContour = curContour;
+                }
             }
 
-            */
+
+            //finds centroid of contour
+            Moments moments = Imgproc.moments(biggestContour);
+            Point junctionPoint = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
+
+            // 1/area gets the distance to the contour
+
+            Imgproc.putText(output, "detected", junctionPoint, Core.FONT_HERSHEY_PLAIN, 1, (255, 255, 255, 255));
 
             /**
              * NOTE: to see how to get data from your pipeline to your OpMode as well as how
