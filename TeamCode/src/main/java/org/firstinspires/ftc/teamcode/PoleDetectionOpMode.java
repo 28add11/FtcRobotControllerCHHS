@@ -30,7 +30,8 @@ import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 import org.opencv.core.MatOfPoint;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.core.MatOfPoint2f;
+import org.opencv.imgproc.Moments;
+import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -258,7 +259,7 @@ public class PoleDetectionOpMode extends LinearOpMode
 
             // 1/area gets the distance to the contour
 
-            Imgproc.putText(output, "detected", junctionPoint, Core.FONT_HERSHEY_PLAIN, 1, (255, 255, 255, 255));
+            Imgproc.circle(output, junctionPoint, 8, new Scalar(0, 255, 0), -1);
 
             /**
              * NOTE: to see how to get data from your pipeline to your OpMode as well as how
@@ -266,7 +267,7 @@ public class PoleDetectionOpMode extends LinearOpMode
              * tapped, please see {@link PipelineStageSwitchingExample}
              */
 
-            return HSVsource;
+            return output;
         }
 
         @Override
