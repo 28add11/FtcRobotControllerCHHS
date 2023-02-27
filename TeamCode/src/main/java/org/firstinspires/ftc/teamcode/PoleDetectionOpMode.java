@@ -138,7 +138,7 @@ public class PoleDetectionOpMode extends LinearOpMode
              * when it will be automatically stopped for you) *IS* supported. The "if" statement
              * below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
              */
-            if(gamepad1.a)
+            /*if(gamepad1.a)
             {
                 /*
                  * IMPORTANT NOTE: calling stopStreaming() will indeed stop the stream of images
@@ -158,10 +158,10 @@ public class PoleDetectionOpMode extends LinearOpMode
                  * it the next time you wish to activate your vision pipeline, which can take a bit of
                  * time. Of course, this comment is irrelevant in light of the use case described in
                  * the above "important note".
-                 */
+
                 webcam.stopStreaming();
                 //webcam.closeCameraDevice();
-            }
+            }*/
 
             /*
              * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
@@ -225,14 +225,16 @@ public class PoleDetectionOpMode extends LinearOpMode
              *
              */
 
-            output = input.clone();
+            //output = input.clone();
+
 
             //UNTESTED AND THE DOCS WERE BAD!!!!
-            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_RGB2HSV); //Convert RGB colorspace of input into HSV
+            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_YUV2); //Convert RGB colorspace of input into HSV
 
             /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
-            Core.inRange(HSVsource, new Scalar(38, 32, 39), new Scalar(78, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
+            Core.inRange(HSVsource, new Scalar(0, 50, 50), new Scalar(100, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
 
+            /*
             java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
 
             Imgproc.findContours(poles, contours, hirearchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
@@ -266,6 +268,11 @@ public class PoleDetectionOpMode extends LinearOpMode
              * to change which stage of the pipeline is rendered to the viewport when it is
              * tapped, please see {@link PipelineStageSwitchingExample}
              */
+
+
+            //java.util.List<Mat> src = java.util.Arrays.asList(poles, input);
+
+            //Core.hconcat(src, output);
 
             return output;
         }
