@@ -206,6 +206,7 @@ public class PoleDetectionOpMode extends LinearOpMode
         Mat HSVsource = new Mat();
         Mat hierarchy = new Mat(); //It needs this for some reason
         Mat output = new Mat();
+        Mat BGRsource = new Mat();
 
         @Override
         public Mat processFrame(Mat input)
@@ -225,10 +226,11 @@ public class PoleDetectionOpMode extends LinearOpMode
              *
              */
 
-            output = input.clone();
+            //output = input.clone();
 
             //UNTESTED AND THE DOCS WERE BAD!!!!
-            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_RGB2HSV); //Convert RGB colorspace of input into HSV
+            Imgproc.cvtColor(input, BGRsource, Imgproc.COLOR_YUV2BGR); //Convert YUV colorspace of input into BGR
+            Imgproc.cvtColor(BGRsource, HSVsource, Imgproc.COLOR_BGR2HSV);
 
             /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
             Core.inRange(HSVsource, new Scalar(38, 32, 39), new Scalar(78, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
