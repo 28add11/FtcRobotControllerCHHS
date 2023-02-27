@@ -230,10 +230,10 @@ public class PoleDetectionOpMode extends LinearOpMode
 
             //UNTESTED AND THE DOCS WERE BAD!!!!
             Imgproc.cvtColor(input, BGRsource, Imgproc.COLOR_YUV2BGR); //Convert YUV colorspace of input into BGR
-            Imgproc.cvtColor(BGRsource, HSVsource, Imgproc.COLOR_BGR2HSV);
+            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_BGR2HSV);
 
             /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
-            Core.inRange(HSVsource, new Scalar(38, 32, 39), new Scalar(78, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
+            Core.inRange(HSVsource, new Scalar(0, 0, 0), new Scalar(117, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
 
 //            java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
 //
@@ -269,7 +269,7 @@ public class PoleDetectionOpMode extends LinearOpMode
 //             * tapped, please see {@link PipelineStageSwitchingExample}
 //             */
 
-            return output;
+            return poles;
         }
 
         @Override
