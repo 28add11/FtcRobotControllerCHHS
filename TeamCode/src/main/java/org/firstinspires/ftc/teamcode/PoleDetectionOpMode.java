@@ -100,6 +100,9 @@ public class PoleDetectionOpMode extends LinearOpMode
                  * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
                  * away from the user.
                  */
+
+                // Note: the YUV thing is a lie. That is the camera input format, but from the software side, 
+                //it inputs RGBA
                 webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             }
 
@@ -206,7 +209,7 @@ public class PoleDetectionOpMode extends LinearOpMode
         Mat HSVsource = new Mat();
         Mat hierarchy = new Mat(); //It needs this for some reason
         Mat output = new Mat();
-        Mat BGRsource = new Mat();
+        Mat RGBsource = new Mat();
 
         @Override
         public Mat processFrame(Mat input)
@@ -229,11 +232,11 @@ public class PoleDetectionOpMode extends LinearOpMode
             //output = input.clone();
 
             //UNTESTED AND THE DOCS WERE BAD!!!!
-            Imgproc.cvtColor(input, BGRsource, Imgproc.COLOR_YUV2BGR); //Convert YUV colorspace of input into BGR
-            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_BGR2HSV);
+            Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_RGBA2RGB); //Convert RGBA colorspace of input into RGB
+            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_RGB2HSV);
 
             /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
-            Core.inRange(HSVsource, new Scalar(0, 0, 0), new Scalar(117, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
+            Core.inRange(HSVsource, new Scalar(38, 42, 46), new Scalar(76, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
 
 //            java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
 //
