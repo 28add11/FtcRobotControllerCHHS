@@ -21,8 +21,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Mat;
@@ -38,10 +42,247 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+
+/* WORK ON THIS LATER, IT'S TIME TO SLEEP! 
+
+public class colorSensorDrive extends LinearOpMode {
+
+
+    
+
+    
+
+
+    @Override
+    public void runOpMode() {
+
+
+
+        // Send telemetry message to signify robot waiting;
+        telemetry.addData("Status", "Ready to run");    //
+        telemetry.update();
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+
+        // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
+
+
+        // Drive forward
+        setMotorInstruction(0, -FORWARD_SPEED, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+        }
+
+        // Step 2:  Stop
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+
+        }
+
+        // send the info back to driver station using telemetry function.
+        telemetry.addData("Clear", colorSensor.alpha());
+        telemetry.addData("Red  ", colorSensor.red());
+        telemetry.addData("Green", colorSensor.green());
+        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.update();
+
+
+        // Park RED
+        if(colorSensor.red() > colorSensor.green() && colorSensor.red() > colorSensor.blue()) //red is location 1
+        {
+            scenario = 0;
+
+            // In order to prevent the cones from getting stuck in the wheels, this code
+            // pushes the cone forward and moves back to its original spot
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Run it back
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+
+
+            //drive left
+            setMotorInstruction(-FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+        }
+
+        // Park GREEN
+        if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
+        {
+            scenario = 1;
+
+            // Do nothing lmao
+        }
+
+        // Park BLUE
+        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
+        {
+            scenario = 2;
+
+            // In order to prevent the cones from getting stuck in the wheels, this code
+            // pushes the cone forward and moves back to its original spot
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Run it back
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Stop to minimize impact of inertia
+            setMotorInstruction(0, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+
+
+            // Drive right
+            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+        }
+
+        telemetry.addData("Scenario", scenario);
+
+        telemetry.update();
+
+        // Step 2:  Stop
+        setMotorInstruction(0, 0, 0);
+        telemetry.addData("Path", "Complete");
+        telemetry.update();
+        sleep(1000);
+    }
+}
+*/
+
+
+
+
 @TeleOp
 public class PoleDetectionOpMode extends LinearOpMode
 {
     OpenCvWebcam webcam;
+
+
+    // Declare OpMode members for each of the 4 motors.
+    private DcMotor leftFrontDrive = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor rightBackDrive = null;
+
+    private ElapsedTime     runtime = new ElapsedTime();
+
+
+    static final double     FORWARD_SPEED = 0.6;
+
+    // Method that simplifies instruction for movement, math required to determine power is done here
+    // Is a copy of math done from a template, and is in use in our main program
+
+    // movementY is forward-back movement (negative backwards positive forwards),
+    // movementX is left-right movement (negative left positive right).
+    public void setMotorInstruction(double movementY, double movementX, double rotation) {
+
+        double max;
+
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        double axial = movementY;
+        double lateral =  movementX;
+        double yaw =  rotation;
+
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+        double leftFrontPower  = axial + lateral + yaw;
+        double rightFrontPower = axial - lateral - yaw;
+        double leftBackPower   = axial - lateral + yaw;
+        double rightBackPower  = axial + lateral - yaw;
+
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(rightBackPower));
+
+        if (max > 1.0) {
+            leftFrontPower  /= max;
+            rightFrontPower /= max;
+            leftBackPower   /= max;
+            rightBackPower  /= max;
+        }
+
+        // Send calculated power to wheels
+        leftFrontDrive.setPower(leftFrontPower);
+        rightFrontDrive.setPower(rightFrontPower);
+        leftBackDrive.setPower(leftBackPower);
+        rightBackDrive.setPower(rightBackPower);
+
+        telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
+        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+        telemetry.update();
+    }
+
+
+    // Color sensor side of things setup
+    ColorSensor colorSensor;    // Hardware Device Object
+
+    int scenario = 0; //0 is parking location 1, 1 is parking location 2, 2 is parking location three
+
 
     @Override
     public void runOpMode()
@@ -67,7 +308,7 @@ public class PoleDetectionOpMode extends LinearOpMode
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        webcam.setPipeline(new SamplePipeline());
+        webcam.setPipeline(new DetectPoles());
 
         /*
          * Open the connection to the camera device. New in v1.4.0 is the ability
@@ -115,6 +356,40 @@ public class PoleDetectionOpMode extends LinearOpMode
             }
         });
 
+
+        //COLORSENSOR SETUP
+
+        // hsvValues is an array that will hold the hue, saturation, and value information.
+        float hsvValues[] = {0F,0F,0F};
+
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
+
+        // bPrevState and bCurrState represent the previous and current state of the button.
+        boolean bPrevState = false;
+        boolean bCurrState = false;
+
+
+        // get a reference to our ColorSensor object.
+        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color");
+
+        // Initialize the hardware variables. Note that the strings used here must correspond
+        // to the names assigned during the robot configuration step on the DS or RC devices.
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+
+        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
+        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+
+
+
         telemetry.addLine("Waiting for start");
         telemetry.update();
 
@@ -136,35 +411,6 @@ public class PoleDetectionOpMode extends LinearOpMode
             telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
             telemetry.update();
 
-            /*
-             * NOTE: stopping the stream from the camera early (before the end of the OpMode
-             * when it will be automatically stopped for you) *IS* supported. The "if" statement
-             * below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
-             */
-            if(gamepad1.a)
-            {
-                /*
-                 * IMPORTANT NOTE: calling stopStreaming() will indeed stop the stream of images
-                 * from the camera (and, by extension, stop calling your vision pipeline). HOWEVER,
-                 * if the reason you wish to stop the stream early is to switch use of the camera
-                 * over to, say, Vuforia or TFOD, you will also need to call closeCameraDevice()
-                 * (commented out below), because according to the Android Camera API documentation:
-                 *         "Your application should only have one Camera object active at a time for
-                 *          a particular hardware camera."
-                 *
-                 * NB: calling closeCameraDevice() will internally call stopStreaming() if applicable,
-                 * but it doesn't hurt to call it anyway, if for no other reason than clarity.
-                 *
-                 * NB2: if you are stopping the camera stream to simply save some processing power
-                 * (or battery power) for a short while when you do not need your vision pipeline,
-                 * it is recommended to NOT call closeCameraDevice() as you will then need to re-open
-                 * it the next time you wish to activate your vision pipeline, which can take a bit of
-                 * time. Of course, this comment is irrelevant in light of the use case described in
-                 * the above "important note".
-                 */
-                webcam.stopStreaming();
-                //webcam.closeCameraDevice();
-            }
 
             /*
              * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
@@ -190,7 +436,7 @@ public class PoleDetectionOpMode extends LinearOpMode
      * if you're doing something weird where you do need it synchronized with your OpMode thread,
      * then you will need to account for that accordingly.
      */
-    class SamplePipeline extends OpenCvPipeline
+    class DetectPoles extends OpenCvPipeline
     {
         boolean viewportPaused;
 
