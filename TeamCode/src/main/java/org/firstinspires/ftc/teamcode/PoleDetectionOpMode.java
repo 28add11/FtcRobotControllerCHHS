@@ -476,7 +476,7 @@ public class PoleDetectionOpMode extends LinearOpMode
              *
              */
 
-            //output = input.clone();
+            output = input.clone();
 
             Imgproc.medianBlur(input, median, 3); //apply a median filter to reduce noise
 
@@ -485,43 +485,43 @@ public class PoleDetectionOpMode extends LinearOpMode
             Imgproc.cvtColor(RGBsource, HSVsource, Imgproc.COLOR_RGB2HSV);
 
             /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
-            Core.inRange(HSVsource, new Scalar(38, 42, 46), new Scalar(76, 100, 100), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
+            Core.inRange(HSVsource, new Scalar(20, 105, 105), new Scalar(43, 255, 255), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
 
-//            java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
-//
-//            Imgproc.findContours(poles, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
-//
-//
-//            Imgproc.drawContours(output, contours, -1, new Scalar(255, 0, 0), 2);
-//
-//            //I got help with the following code from LHACK4142#7686 on discord, many thanks to him!
-//
-//
-//            //finds the biggest pole, ie the closest, since it will take up the largest portion of the FOV
-//            MatOfPoint biggestContour = contours.get(0); // this is because using the default constructor sets biggestContour up in a bad way
-//
-//            for (MatOfPoint curContour : contours) {
-//                if (Imgproc.contourArea(curContour) > Imgproc.contourArea(biggestContour)) {
-//                    biggestContour = curContour;
-//                }
-//            }
-//
-//
-//            //finds centroid of contour
-//            Moments moments = Imgproc.moments(biggestContour);
-//            Point junctionPoint = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
-//
-//            // 1/area gets the distance to the contour
-//
-//            Imgproc.circle(output, junctionPoint, 8, new Scalar(0, 255, 0), -1);
-//
-//            /**
-//             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
-//             * to change which stage of the pipeline is rendered to the viewport when it is
-//             * tapped, please see {@link PipelineStageSwitchingExample}
-//             */
+            java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
 
-            return poles;
+            Imgproc.findContours(poles, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
+
+
+            Imgproc.drawContours(output, contours, -1, new Scalar(255, 0, 0), 2);
+
+            //I got help with the following code from LHACK4142#7686 on discord, many thanks to him!
+
+
+            //finds the biggest pole, ie the closest, since it will take up the largest portion of the FOV
+            MatOfPoint biggestContour = contours.get(0); // this is because using the default constructor sets biggestContour up in a bad way
+
+            for (MatOfPoint curContour : contours) {
+                if (Imgproc.contourArea(curContour) > Imgproc.contourArea(biggestContour)) {
+                    biggestContour = curContour;
+                }
+            }
+
+
+            //finds centroid of contour
+            Moments moments = Imgproc.moments(biggestContour);
+            Point junctionPoint = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
+
+            // 1/area gets the distance to the contour
+
+            Imgproc.circle(output, junctionPoint, 8, new Scalar(0, 255, 0), -1);
+
+            /**
+             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
+             * to change which stage of the pipeline is rendered to the viewport when it is
+             * tapped, please see {@link PipelineStageSwitchingExample}
+             */
+
+            return output;
         }
 
         @Override
