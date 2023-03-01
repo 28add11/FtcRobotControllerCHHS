@@ -26,6 +26,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -185,12 +189,30 @@ public class PoleDetectionOpMode extends LinearOpMode
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    private Servo clawServo;
+    private CRServo slideServoA;
+    private CRServo slideServoB;
+    private CRServo slideServoC;
 
     private ElapsedTime runtime = new ElapsedTime();
 
 
     static final double FORWARD_SPEED = 0.6;
     static final double ROTATION_SPEED = 0.3;
+    // Servo stuff
+    static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each cycle
+    static final double INCREMENT_SLIDE =         0.10;     // amount to slew slide servo
+    static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
+    static final double MIN_POS         =          0.0;     // Minimum rotational position
+    static final double MAX_CLAW        =   45.0/270.0;     // Maximum rotational position for the claw
+
+    // Define class members
+
+    double clawPos = (MIN_POS);  // Start at 0
+    double slidePower = (MIN_POS); // Start at 0
+    boolean clawActivated = false;
+    boolean buttonAPressed = false;
+    //Servo stuff end
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
@@ -237,6 +259,36 @@ public class PoleDetectionOpMode extends LinearOpMode
         telemetry.update();
     }
 
+
+    // Function to control slides. Pass -1 to lower, 0 to halt, 1 to raise
+    public void setSlidePos(double raseLower) {
+        slideServoA.setPower(slidePower);
+        slideServoB.setPower(slidePower);
+        slideServoC.setPower(slidePower);
+    }
+
+
+    public void moveClaw(boolean clawActivated) {
+        do {
+            if (clawActivated) {
+                // Keep stepping up until we hit the max value.
+                clawPos += INCREMENT_CLAW;
+                if (clawPos > MAX_CLAW ) {
+                    clawPos = MAX_CLAW;
+                }
+            } else {
+                // Keep stepping down until we hit the min value.
+                clawPos -= INCREMENT_CLAW;
+                if (clawPos < MIN_POS ) {
+                    clawPos = MIN_POS;
+                }
+
+            }
+        
+            clawServo.setPosition(clawPos);
+            sleep(70);
+        } while (clawPos != MAX_CLAW || clawpos != MIN_POS);
+    }
 
     // Color sensor side of things setup
     ColorSensor colorSensor;    // Hardware Device Object
@@ -334,6 +386,10 @@ public class PoleDetectionOpMode extends LinearOpMode
         leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        clawServo = hardwareMap.get(Servo.class, "claw_servo");
+        slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
+        slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
+        slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -342,6 +398,9 @@ public class PoleDetectionOpMode extends LinearOpMode
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
 
@@ -422,7 +481,7 @@ public class PoleDetectionOpMode extends LinearOpMode
             {
                 // Clever little bit of code to avoid ifs. Gets sign of where we want the point - the actual point, then moves in the appropreate direction
                 int signX = Math.signum(320 - getTargetPointX())
-                setMotorInstruction(0, FORWARD_SPEED * signX, 0); 
+                setMotorInstruction(0, FORWARD_SPEED * signX, 0);
                 runtime.reset();
                 while (opModeIsActive() && !(detectPoles.getTargetPointX() >= 310 && detectPoles.getTargetPointX() <= 330)) // loop until detectPoles.getTargetPointX is between 310 and 330
                 {
@@ -430,11 +489,17 @@ public class PoleDetectionOpMode extends LinearOpMode
                 }
                 timeX = runtime.seconds();
 
+                setSlidePos(1.0);
+
                 setMotorInstruction(0, 0, 0);
                 runtime.reset();
-                while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+                while (opModeIsActive() && (runtime.seconds() < 0.5))
+                {
 
                 }
+
+                setSlidePos(0.0);
+
             }
         }
     }
