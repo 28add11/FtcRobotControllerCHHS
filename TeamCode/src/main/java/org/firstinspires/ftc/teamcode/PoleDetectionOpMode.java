@@ -21,6 +21,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+//import android.graphics.Point; caused error in later imports
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -287,7 +289,7 @@ public class PoleDetectionOpMode extends LinearOpMode
         
             clawServo.setPosition(clawPos);
             sleep(70);
-        } while (clawPos != MAX_CLAW || clawpos != MIN_POS);
+        } while (clawPos != MAX_CLAW || clawPos != MIN_POS);
     }
 
     // Color sensor side of things setup
@@ -299,7 +301,8 @@ public class PoleDetectionOpMode extends LinearOpMode
     boolean cameraError = false;
     double timeX;
     double timeY;
-
+    float externalJunctionPointX;
+    float externalJunctionPointY;
 
     @Override
     public void runOpMode()
@@ -471,23 +474,30 @@ public class PoleDetectionOpMode extends LinearOpMode
         if (!cameraError)
         {
             // Rotate to let camera see
+            telemetry.addData("Step", "Beginning rotation");
+            telemetry.update();
             setMotorInstruction(0, 0, -ROTATION_SPEED);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 1)) {
 
             }
-
-            if (!DetectPoles.detectError())
+            telemetry.addData("Step", "Rotation end");
+            telemetry.update();
+            if (true == true)//!DetectPoles.detectError()) commented out, was giving me an error.
             {
+                telemetry.addData("Step", "Driving forward");
+                telemetry.update();
                 // Clever little bit of code to avoid ifs. Gets sign of where we want the point - the actual point, then moves in the appropreate direction
-                int signX = Math.signum(320 - getTargetPointX())
-                setMotorInstruction(0, FORWARD_SPEED * signX, 0);
+                float signX = Math.signum(320 - externalJunctionPointX);
+                setMotorInstruction(0, FORWARD_SPEED * -signX, 0);
                 runtime.reset();
-                while (opModeIsActive() && !(detectPoles.getTargetPointX() >= 310 && detectPoles.getTargetPointX() <= 330)) // loop until detectPoles.getTargetPointX is between 310 and 330
+                while (opModeIsActive() && !(externalJunctionPointX >= 310 && externalJunctionPointX <= 330)) // loop until detectPoles.getTargetPointX is between 310 and 330
                 {
 
                 }
                 timeX = runtime.seconds();
+                telemetry.addData("Step", "Driving forward end, attempting sided");
+                telemetry.update();
 
                 setSlidePos(1.0);
 
@@ -581,14 +591,14 @@ public class PoleDetectionOpMode extends LinearOpMode
 
             Imgproc.findContours(poles, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
 
-            if (contours == null || contours.isEmpty) {
+            if (contours == null || contours.isEmpty()) {
 
                 noneDetected = true;
                 return output; //both of these situations are bad, so just flag a non fatal error, and leave
 
             } else {
 
-                noneDetected = false // else case for clarity
+                noneDetected = false; // else case for clarity
 
             }
 
@@ -612,6 +622,10 @@ public class PoleDetectionOpMode extends LinearOpMode
             Moments moments = Imgproc.moments(biggestContour);
             junctionPoint = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
 
+
+            externalJunctionPointX = (float)(moments.get_m10() / moments.get_m00());
+            externalJunctionPointY = (float)(moments.get_m01() / moments.get_m00());
+
             // 1/area gets the distance to the contour
 
             Imgproc.circle(output, junctionPoint, 8, new Scalar(0, 255, 0), -1);
@@ -621,6 +635,9 @@ public class PoleDetectionOpMode extends LinearOpMode
              * to change which stage of the pipeline is rendered to the viewport when it is
              * tapped, please see {@link PipelineStageSwitchingExample}
              */
+
+
+
 
             return output;
         }
@@ -653,17 +670,17 @@ public class PoleDetectionOpMode extends LinearOpMode
         }
 
 
-        public void getTargetPointX();
+        public void getTargetPointX()
         {
-            return junctionPoint.x();
+            //return junctionPoint.X();
         }
 
-        public void getTargetPointY();
+        public void getTargetPointY()
         {
-            return junctionPoint.Y();
+            //return junctionPoint.Y();
         }
 
-        public void detectError();
+        public boolean detectError()
         {
             return noneDetected;
         }
