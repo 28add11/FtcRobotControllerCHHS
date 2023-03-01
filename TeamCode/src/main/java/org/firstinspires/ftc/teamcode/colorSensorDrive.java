@@ -136,12 +136,6 @@ public class colorSensorDrive extends LinearOpMode {
 
         //COLORSENSOR SETUP
 
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F,0F,0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
         // get a reference to the RelativeLayout so we can change the background
         // color of the Robot Controller app to match the hue detected by the RGB sensor.
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
