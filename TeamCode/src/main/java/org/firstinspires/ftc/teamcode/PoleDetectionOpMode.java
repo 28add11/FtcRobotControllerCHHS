@@ -42,6 +42,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.lang.Math;
+
 
 /* WORK ON THIS LATER, IT'S TIME TO SLEEP! 
 
@@ -68,20 +70,8 @@ public class colorSensorDrive extends LinearOpMode {
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
 
 
-        // Drive forward
-        setMotorInstruction(0, -FORWARD_SPEED, 0);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
-            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }
 
-        // Step 2:  Stop
-        setMotorInstruction(0, 0, 0);
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
 
-        }
 
         // send the info back to driver station using telemetry function.
         telemetry.addData("Clear", colorSensor.alpha());
@@ -96,38 +86,7 @@ public class colorSensorDrive extends LinearOpMode {
         {
             scenario = 0;
 
-            // In order to prevent the cones from getting stuck in the wheels, this code
-            // pushes the cone forward and moves back to its original spot
-            setMotorInstruction(0, -FORWARD_SPEED, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-            // Stop to minimize impact of inertia
-            setMotorInstruction(0, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-            // Run it back
-            setMotorInstruction(0, FORWARD_SPEED, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-            // Stop to minimize impact of inertia
-            setMotorInstruction(0, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
+            
 
 
 
@@ -227,10 +186,11 @@ public class PoleDetectionOpMode extends LinearOpMode
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
 
-    private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime runtime = new ElapsedTime();
 
 
-    static final double     FORWARD_SPEED = 0.6;
+    static final double FORWARD_SPEED = 0.6;
+    static final double ROTATION_SPEED = 0.3;
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
@@ -243,7 +203,7 @@ public class PoleDetectionOpMode extends LinearOpMode
 
         // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
         double axial = movementY;
-        double lateral =  movementX;
+        double lateral = movementX;
         double yaw =  rotation;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
@@ -282,6 +242,11 @@ public class PoleDetectionOpMode extends LinearOpMode
     ColorSensor colorSensor;    // Hardware Device Object
 
     int scenario = 0; //0 is parking location 1, 1 is parking location 2, 2 is parking location three
+
+    // Non color sensor stuff
+    boolean cameraError = false;
+    double timeX;
+    double timeY;
 
 
     @Override
@@ -353,22 +318,12 @@ public class PoleDetectionOpMode extends LinearOpMode
                 /*
                  * This will be called if the camera could not be opened
                  */
+                cameraError = true;
             }
         });
 
 
         //COLORSENSOR SETUP
-
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F,0F,0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
-        // bPrevState and bCurrState represent the previous and current state of the button.
-        boolean bPrevState = false;
-        boolean bCurrState = false;
-
 
         // get a reference to our ColorSensor object.
         colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color");
@@ -398,26 +353,89 @@ public class PoleDetectionOpMode extends LinearOpMode
          */
         waitForStart();
 
-        while (opModeIsActive())
-        {
-            /*
-             * Send some stats to the telemetry
-             */
-            telemetry.addData("Frame Count", webcam.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
-            telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
+        // Drive forward
+        setMotorInstruction(0, -FORWARD_SPEED, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+            telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
+        }
+
+        // Step 2:  Stop
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+        }
 
 
-            /*
-             * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
-             * excess CPU cycles for no reason. (By default, telemetry is only sent to the DS at 4Hz
-             * anyway). Of course in a real OpMode you will likely not want to do this.
-             */
-            sleep(100);
+        if(colorSensor.red() > colorSensor.green() && colorSensor.red() > colorSensor.blue()) //red is location 1
+        {
+            scenario = 0;
+        }
+
+        if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
+        {
+            scenario = 1;
+        }
+        
+        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
+        {
+            scenario = 2;
+        }
+
+
+        // In order to prevent the cones from getting stuck in the wheels, this code
+        // pushes the cone forward and moves back to its original spot
+        setMotorInstruction(0, -FORWARD_SPEED, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            telemetry.addData("Path", "Leg 2: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+        }
+
+        // Run it back
+        setMotorInstruction(0, FORWARD_SPEED, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.6)) {
+            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+        }
+
+        // Stop to minimize impact of inertia
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.3)) {
+
+        }
+
+        if (!cameraError)
+        {
+            // Rotate to let camera see
+            setMotorInstruction(0, 0, -ROTATION_SPEED);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+            }
+
+            if (!DetectPoles.detectError())
+            {
+                // Clever little bit of code to avoid ifs. Gets sign of where we want the point - the actual point, then moves in the appropreate direction
+                int signX = Math.signum(320 - getTargetPointX())
+                setMotorInstruction(0, FORWARD_SPEED * signX, 0); 
+                runtime.reset();
+                while (opModeIsActive() && !(detectPoles.getTargetPointX() >= 310 && detectPoles.getTargetPointX() <= 330)) // loop until detectPoles.getTargetPointX is between 310 and 330
+                {
+
+                }
+                timeX = runtime.seconds();
+
+                setMotorInstruction(0, 0, 0);
+                runtime.reset();
+                while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+
+                }
+            }
         }
     }
 
@@ -458,6 +476,11 @@ public class PoleDetectionOpMode extends LinearOpMode
         Mat RGBsource = new Mat();
         Mat median = new Mat();
 
+        // Declaring variables to interface with the opmode
+
+        Point junctionPoint = new Point(0, 0);
+        boolean noneDetected;
+
         @Override
         public Mat processFrame(Mat input)
         {
@@ -484,12 +507,25 @@ public class PoleDetectionOpMode extends LinearOpMode
             Imgproc.cvtColor(median, RGBsource, Imgproc.COLOR_RGBA2RGB); //Convert RGBA colorspace of input into RGB
             Imgproc.cvtColor(RGBsource, HSVsource, Imgproc.COLOR_RGB2HSV);
 
-            /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max */
+            /* Change the Scalars to modify parameters. In HSV colorspace. First Scalar is min value, second is max 
+             * Values are gotten from an online color picker, (H/360) * 255 for the hue to put in the code, ([S, V]/100) * 100 to get saturation or value for the code
+            */
             Core.inRange(HSVsource, new Scalar(20, 105, 105), new Scalar(43, 255, 255), poles); //Looks at every pixel of HSVsource, sees if it is between the two scalars, 255 if it is, 0 if it isnt
 
             java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
 
             Imgproc.findContours(poles, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //finds contours, meaning edges. should work in practice
+
+            if (contours == null || contours.isEmpty) {
+
+                noneDetected = true;
+                return output; //both of these situations are bad, so just flag a non fatal error, and leave
+
+            } else {
+
+                noneDetected = false // else case for clarity
+
+            }
 
 
             Imgproc.drawContours(output, contours, -1, new Scalar(255, 0, 0), 2);
@@ -509,7 +545,7 @@ public class PoleDetectionOpMode extends LinearOpMode
 
             //finds centroid of contour
             Moments moments = Imgproc.moments(biggestContour);
-            Point junctionPoint = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
+            junctionPoint = new Point(moments.get_m10() / moments.get_m00(), moments.get_m01() / moments.get_m00());
 
             // 1/area gets the distance to the contour
 
@@ -550,5 +586,22 @@ public class PoleDetectionOpMode extends LinearOpMode
                 webcam.resumeViewport();
             }
         }
+
+
+        public void getTargetPointX();
+        {
+            return junctionPoint.x();
+        }
+
+        public void getTargetPointY();
+        {
+            return junctionPoint.Y();
+        }
+
+        public void detectError();
+        {
+            return noneDetected;
+        }
+
     }
 }
