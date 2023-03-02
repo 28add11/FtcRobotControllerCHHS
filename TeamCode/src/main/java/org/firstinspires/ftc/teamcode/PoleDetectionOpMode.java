@@ -200,7 +200,7 @@ public class PoleDetectionOpMode extends LinearOpMode
 
 
     static final double FORWARD_SPEED = 0.6;
-    static final double ROTATION_SPEED = 0.3;
+    static final double ROTATION_SPEED = 0.6;
     // Servo stuff
     static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each cycle
     static final double INCREMENT_SLIDE =         0.10;     // amount to slew slide servo
@@ -415,6 +415,7 @@ public class PoleDetectionOpMode extends LinearOpMode
          */
         waitForStart();
 
+
         // Drive forward
         setMotorInstruction(0, -FORWARD_SPEED, 0);
         runtime.reset();
@@ -478,7 +479,7 @@ public class PoleDetectionOpMode extends LinearOpMode
             telemetry.update();
             setMotorInstruction(0, 0, -ROTATION_SPEED);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.15)) {
 
             }
             telemetry.addData("Step", "Rotation end");
@@ -488,16 +489,18 @@ public class PoleDetectionOpMode extends LinearOpMode
                 telemetry.addData("Step", "Driving forward");
                 telemetry.update();
                 // Clever little bit of code to avoid ifs. Gets sign of where we want the point - the actual point, then moves in the appropreate direction
-                float signX = Math.signum(320 - externalJunctionPointX);
-                setMotorInstruction(0, FORWARD_SPEED * -signX, 0);
+                float signX = Math.signum(175 - externalJunctionPointX); //formerly 320
+                setMotorInstruction(0, FORWARD_SPEED * signX * 0.5, 0);
                 runtime.reset();
-                while (opModeIsActive() && !(externalJunctionPointX >= 310 && externalJunctionPointX <= 330)) // loop until detectPoles.getTargetPointX is between 310 and 330
+                while (opModeIsActive() && !(externalJunctionPointX >= 165 && externalJunctionPointX <= 185)) // loop until detectPoles.getTargetPointX is between 310 and 330
                 {
-
+                    telemetry.addData("Funni number 1", externalJunctionPointX);
+                    telemetry.update();
                 }
                 timeX = runtime.seconds();
-                telemetry.addData("Step", "Driving forward end, attempting sided");
-                telemetry.update();
+
+
+
 
                 setSlidePos(1.0);
 
