@@ -263,10 +263,10 @@ public class PoleDetectionOpMode extends LinearOpMode
 
 
     // Function to control slides. Pass -1 to lower, 0 to halt, 1 to raise
-    public void setSlidePos(double raseLower) {
-        slideServoA.setPower(slidePower);
-        slideServoB.setPower(slidePower);
-        slideServoC.setPower(slidePower);
+    public void setSlidePos(double power) {
+        slideServoA.setPower(power);
+        slideServoB.setPower(power);
+        slideServoC.setPower(power);
     }
 
 
@@ -303,6 +303,7 @@ public class PoleDetectionOpMode extends LinearOpMode
     double timeY;
     float externalJunctionPointX;
     float externalJunctionPointY;
+    float contourarea;
 
     @Override
     public void runOpMode()
@@ -471,7 +472,7 @@ public class PoleDetectionOpMode extends LinearOpMode
         while (opModeIsActive() && (runtime.seconds() < 0.3)) {
 
         }
-//
+
         if (!cameraError)
         {
             // Rotate to let camera see
@@ -502,16 +503,35 @@ public class PoleDetectionOpMode extends LinearOpMode
 
 
 
-                setSlidePos(1.0);
+                setMotorInstruction(FORWARD_SPEED * 0.5, 0, 0);
+
+                while (opModeIsActive() && (contourarea < 20000))
+                {
+                    telemetry.addData("info", "going to pole");
+                    telemetry.update();
+                }
 
                 setMotorInstruction(0, 0, 0);
-                runtime.reset();
-                while (opModeIsActive() && (runtime.seconds() < 0.5))
-                {
 
+
+                //setSlidePos(1.0);
+
+                runtime.reset();
+                while (opModeIsActive() && (runtime.seconds() < 6.75))
+                {
+                    telemetry.addData("info", "raising slide while stopped");
+                    telemetry.update();
                 }
 
                 setSlidePos(0.0);
+
+
+                runtime.reset();
+                while (opModeIsActive() && (runtime.seconds() < 0.5))
+                {
+                    telemetry.addData("info", "end");
+                    telemetry.update();
+                }
 
             }
         }
@@ -619,7 +639,7 @@ public class PoleDetectionOpMode extends LinearOpMode
                     biggestContour = curContour;
                 }
             }
-
+            contourarea = (float)Imgproc.contourArea(biggestContour);
 
             //finds centroid of contour
             Moments moments = Imgproc.moments(biggestContour);
