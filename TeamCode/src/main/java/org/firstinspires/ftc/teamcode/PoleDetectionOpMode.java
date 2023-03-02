@@ -471,7 +471,7 @@ public class PoleDetectionOpMode extends LinearOpMode
         while (opModeIsActive() && (runtime.seconds() < 0.3)) {
 
         }
-
+//
         if (!cameraError)
         {
             // Rotate to let camera see
