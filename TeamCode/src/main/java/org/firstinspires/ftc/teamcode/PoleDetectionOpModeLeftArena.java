@@ -23,13 +23,11 @@ package org.firstinspires.ftc.teamcode;
 
 //import android.graphics.Point; caused error in later imports
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -181,7 +179,7 @@ public class colorSensorDrive extends LinearOpMode {
 
 
 @TeleOp
-public class PoleDetectionOpMode extends LinearOpMode
+public class PoleDetectionOpModeLeftArena extends LinearOpMode
 {
     OpenCvWebcam webcam;
 
@@ -449,6 +447,8 @@ public class PoleDetectionOpMode extends LinearOpMode
         }
 
 
+
+
         // In order to prevent the cones from getting stuck in the wheels, this code
         // pushes the cone forward and moves back to its original spot
         setMotorInstruction(0, -FORWARD_SPEED, 0);
@@ -473,6 +473,15 @@ public class PoleDetectionOpMode extends LinearOpMode
 
         }
 
+        // Drive right
+        setMotorInstruction(FORWARD_SPEED, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 2)) {
+
+        }
+
+        float signX = 0;
+
         if (!cameraError)
         {
             // Rotate to let camera see
@@ -480,9 +489,17 @@ public class PoleDetectionOpMode extends LinearOpMode
             telemetry.update();
             setMotorInstruction(0, 0, -ROTATION_SPEED);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.15)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.15/2)) {
 
             }
+            /*// Back up
+            setMotorInstruction(-FORWARD_SPEED, 0, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 1)) {
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }*/
+
             telemetry.addData("Step", "Rotation end");
             telemetry.update();
             if (true == true)//!DetectPoles.detectError()) commented out, was giving me an error.
@@ -490,40 +507,62 @@ public class PoleDetectionOpMode extends LinearOpMode
                 telemetry.addData("Step", "Driving forward");
                 telemetry.update();
                 // Clever little bit of code to avoid ifs. Gets sign of where we want the point - the actual point, then moves in the appropreate direction
-                float signX = Math.signum(175 - externalJunctionPointX); //formerly 320
+                signX = Math.signum(175 - externalJunctionPointX); //formerly 320
                 setMotorInstruction(0, FORWARD_SPEED * signX * 0.5, 0);
                 runtime.reset();
-                while (opModeIsActive() && !(externalJunctionPointX >= 165 && externalJunctionPointX <= 185)) // loop until detectPoles.getTargetPointX is between 310 and 330
+                while (opModeIsActive() && !(externalJunctionPointX >= 160 && externalJunctionPointX <= 190)) // loop until detectPoles.getTargetPointX is between 310 and 330
                 {
                     telemetry.addData("Funni number 1", externalJunctionPointX);
                     telemetry.update();
                 }
                 timeX = runtime.seconds();
-
+                runtime.reset();
 
 
 
                 setMotorInstruction(FORWARD_SPEED * 0.5, 0, 0);
 
-                while (opModeIsActive() && (contourarea < 20000))
+
+                while (opModeIsActive() && (contourarea < 15000))
                 {
                     telemetry.addData("info", "going to pole");
                     telemetry.update();
                 }
 
+                timeY = runtime.seconds();
+
                 setMotorInstruction(0, 0, 0);
 
 
-                //setSlidePos(1.0);
+                setSlidePos(1.0);
+                setMotorInstruction(FORWARD_SPEED, 0, 0);
 
                 runtime.reset();
-                while (opModeIsActive() && (runtime.seconds() < 6.75))
+                while (opModeIsActive() && (runtime.seconds() < 0.15))
+                {
+                    telemetry.addData("info", "moving forward");
+                    telemetry.update();
+                }
+
+                setMotorInstruction(0, 0, 0);
+
+                while (opModeIsActive() && (runtime.seconds() < 7))
                 {
                     telemetry.addData("info", "raising slide while stopped");
                     telemetry.update();
                 }
 
+                setSlidePos(-1);
+
+                runtime.reset();
+                while (opModeIsActive() && (runtime.seconds() < 7/2))
+                {
+                    telemetry.addData("info", "lowering slide while stopped");
+                    telemetry.update();
+                }
+
                 setSlidePos(0.0);
+
 
 
                 runtime.reset();
@@ -534,6 +573,65 @@ public class PoleDetectionOpMode extends LinearOpMode
                 }
 
             }
+        }
+
+        setMotorInstruction(-FORWARD_SPEED * 0.5, 0, 0); //reverse forward driving
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < timeY)) {
+
+        }
+
+        // Stop to minimize impact of inertia
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.3)) {
+
+        }
+
+        setMotorInstruction(0, FORWARD_SPEED * -signX * 0.5, 0); //reverse X axis driving
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < timeX)) {
+
+        }
+
+        // Stop to minimize impact of inertia
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.3)) {
+
+        }
+
+        /*// Undo backup
+        setMotorInstruction(FORWARD_SPEED, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 1)) {
+            telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+        }*/
+
+        // Rotate to original pos
+        telemetry.addData("Step", "Beginning rotation");
+        telemetry.update();
+        setMotorInstruction(0, 0, ROTATION_SPEED);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 1.15/2)) {
+
+        }
+        telemetry.addData("Step", "Rotation end");
+        telemetry.update();
+
+        // Stop to minimize impact of inertia
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.3)) {
+
+        }
+
+        // drive left
+        setMotorInstruction(-FORWARD_SPEED, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 2)) {
+
         }
     }
 
@@ -640,6 +738,9 @@ public class PoleDetectionOpMode extends LinearOpMode
                 }
             }
             contourarea = (float)Imgproc.contourArea(biggestContour);
+
+            //telemetry.addData("area", contourarea);
+            //telemetry.update();
 
             //finds centroid of contour
             Moments moments = Imgproc.moments(biggestContour);
