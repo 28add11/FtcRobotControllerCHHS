@@ -81,7 +81,7 @@ public class colorSensorDrive extends LinearOpMode {
     private ElapsedTime     runtime = new ElapsedTime();
 
 
-    static final double     FORWARD_SPEED = 0.6;
+    static final double     FORWARD_SPEED = 0.4;
 //    static final double     TURN_SPEED    = 0.5;
 
     int scenario = 0; //0 is parking location 1, 1 is parking location 2, 2 is parking location three
@@ -214,7 +214,7 @@ public class colorSensorDrive extends LinearOpMode {
         // Drive forward
         setMotorInstruction(0, -FORWARD_SPEED, 0);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 2.15)) {
+        while (opModeIsActive() && (runtime.seconds() < 3.75)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
@@ -222,7 +222,7 @@ public class colorSensorDrive extends LinearOpMode {
         // Step 2:  Stop
         setMotorInstruction(0, 0, 0);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+        while (opModeIsActive() && (runtime.seconds() < 1)) {
 
         }
 
@@ -244,7 +244,7 @@ public class colorSensorDrive extends LinearOpMode {
             // pushes the cone forward and moves back to its original spot
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.23)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -252,7 +252,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -260,7 +260,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Run it back
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.23)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -268,17 +268,31 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
 
 
 
+            double steadyaccel = 0;
             //drive left
-            setMotorInstruction(-FORWARD_SPEED, 0, 0);
+            setMotorInstruction(-FORWARD_SPEED * steadyaccel, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.86)) { //formerly 1.3
+            while (opModeIsActive() && (runtime.seconds() < 3.17)) { //formerly 1.3
+                if(steadyaccel <= 1)
+                {
+                    steadyaccel = steadyaccel + 0.01;
+                }
+                setMotorInstruction(-FORWARD_SPEED * steadyaccel, 0, 0);
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Run it forward
+            setMotorInstruction(0, -FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -302,7 +316,7 @@ public class colorSensorDrive extends LinearOpMode {
             // pushes the cone forward and moves back to its original spot
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.23)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -310,7 +324,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -318,7 +332,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Run it back
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.23)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -326,17 +340,31 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
 
 
+            double steadyaccel = 0;
 
             // Drive right
-            setMotorInstruction(FORWARD_SPEED, 0, 0);
+            setMotorInstruction(FORWARD_SPEED*steadyaccel, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.86)) { //formerly 1.3
+            while (opModeIsActive() && (runtime.seconds() < 3.17)) { //formerly 1.3
+                if(steadyaccel <= 1)
+                {
+                    steadyaccel = steadyaccel + 0.01;
+                }
+                setMotorInstruction(FORWARD_SPEED*steadyaccel, 0, 0);
+                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+
+            // Run it back
+            setMotorInstruction(0, FORWARD_SPEED, 0);
+            runtime.reset();
+            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
