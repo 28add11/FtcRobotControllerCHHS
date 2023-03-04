@@ -232,11 +232,11 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.
 
-        double FrontLeft  = movementY + movementX + rotation;
-        double FrontRight = movementY - movementX - rotation;
+        double FrontLeft  = movementY + movementX * (Math.sqrt(2)/2) + rotation;
+        double FrontRight = movementY - movementX * (Math.sqrt(2)/2) - rotation;
         //double FrontLeft  = -1/2*movementX - Math.sqrt(3)/2*movementY + rotation;
         //double FrontRight = -1/2*movementX + Math.sqrt(3)/2*movementY + rotation;
-        double Rear   = movementX;
+        double Rear   = movementX - rotation;
 
         // Normalize the values so no wheel power exceeds 100%
         // This ensures that the robot maintains the desired motion.

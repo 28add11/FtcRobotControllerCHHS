@@ -144,11 +144,11 @@ public class colorSensorDrive extends LinearOpMode {
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.
 
-        double FrontLeft  = movementY + movementX + rotation;
-        double FrontRight = movementY - movementX - rotation;
+        double FrontLeft  = movementY + movementX * (Math.sqrt(2)/2) + rotation;
+        double FrontRight = movementY - movementX * (Math.sqrt(2)/2) - rotation;
         //double FrontLeft  = -1/2*movementX - Math.sqrt(3)/2*movementY + rotation;
         //double FrontRight = -1/2*movementX + Math.sqrt(3)/2*movementY + rotation;
-        double Rear   = movementX;
+        double Rear   = movementX - rotation;
 
         // Normalize the values so no wheel power exceeds 100%
         // This ensures that the robot maintains the desired motion.
@@ -214,7 +214,7 @@ public class colorSensorDrive extends LinearOpMode {
         // Drive forward
         setMotorInstruction(0, -FORWARD_SPEED, 0);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.15)) {
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
         }
@@ -244,7 +244,7 @@ public class colorSensorDrive extends LinearOpMode {
             // pushes the cone forward and moves back to its original spot
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -252,7 +252,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -260,7 +260,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Run it back
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -268,7 +268,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -278,7 +278,7 @@ public class colorSensorDrive extends LinearOpMode {
             //drive left
             setMotorInstruction(-FORWARD_SPEED, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.86)) { //formerly 1.3
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -302,7 +302,7 @@ public class colorSensorDrive extends LinearOpMode {
             // pushes the cone forward and moves back to its original spot
             setMotorInstruction(0, -FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -310,7 +310,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -318,7 +318,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Run it back
             setMotorInstruction(0, FORWARD_SPEED, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -326,7 +326,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Stop to minimize impact of inertia
             setMotorInstruction(0, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
+            while (opModeIsActive() && (runtime.seconds() < 0.72)) {
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
@@ -336,7 +336,7 @@ public class colorSensorDrive extends LinearOpMode {
             // Drive right
             setMotorInstruction(FORWARD_SPEED, 0, 0);
             runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
+            while (opModeIsActive() && (runtime.seconds() < 1.86)) { //formerly 1.3
                 telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
                 telemetry.update();
             }
