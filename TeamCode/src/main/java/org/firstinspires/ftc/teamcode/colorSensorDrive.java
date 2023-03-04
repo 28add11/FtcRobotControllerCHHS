@@ -74,9 +74,9 @@ public class colorSensorDrive extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
+    private DcMotor rearDrive = null;
+    private DcMotor slideMotor = null;
 
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -91,7 +91,7 @@ public class colorSensorDrive extends LinearOpMode {
 
     // movementY is forward-back movement (negative backwards positive forwards),
     // movementX is left-right movement (negative left positive right).
-    public void setMotorInstruction(double movementY, double movementX, double rotation) {
+   /* public void setMotorInstruction(double movementY, double movementX, double rotation) {
 
         double max;
 
@@ -129,6 +129,44 @@ public class colorSensorDrive extends LinearOpMode {
         telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
         telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
         telemetry.update();
+    }*/
+
+    public void setMotorInstruction(double movementY, double movementX, double rotation) //based off of https://stackoverflow.com/questions/3748037/how-to-control-a-kiwi-drive-robot
+    {
+
+        double max;
+
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        //double axial = movementY;
+        //double lateral =  movementX;
+        //double yaw =  rotation;
+
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+
+        double FrontLeft  = movementY + movementX + rotation;
+        double FrontRight = movementY - movementX - rotation;
+        //double FrontLeft  = -1/2*movementX - Math.sqrt(3)/2*movementY + rotation;
+        //double FrontRight = -1/2*movementX + Math.sqrt(3)/2*movementY + rotation;
+        double Rear   = movementX;
+
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(FrontLeft), Math.abs(FrontRight));
+        max = Math.max(max, Math.abs(Rear));
+
+
+        if (max > 1.0) {
+            FrontLeft  /= max;
+            FrontRight /= max;
+            Rear   /= max;
+        }
+
+        // Send calculated power to wheels
+        leftFrontDrive.setPower(FrontLeft);
+        rightFrontDrive.setPower(FrontRight);
+        rearDrive.setPower(Rear);
+
     }
 
     @Override
@@ -151,17 +189,17 @@ public class colorSensorDrive extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rearDrive  = hardwareMap.get(DcMotor.class, "rear_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        slideMotor = hardwareMap.get(DcMotor.class, "slide_motor");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rearDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        slideMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //

@@ -186,13 +186,13 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
 
     // Declare OpMode members for each of the 4 motors.
     private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
+    private DcMotor rearDrive = null;
+    private DcMotor slideMotor = null;
     private Servo clawServo;
-    private CRServo slideServoA;
-    private CRServo slideServoB;
-    private CRServo slideServoC;
+    //private CRServo slideServoA;
+    //private CRServo slideServoB;
+    //private CRServo slideServoC;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -219,52 +219,51 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
 
     // movementY is forward-back movement (negative backwards positive forwards),
     // movementX is left-right movement (negative left positive right).
-    public void setMotorInstruction(double movementY, double movementX, double rotation) {
+    public void setMotorInstruction(double movementY, double movementX, double rotation) //based off of https://stackoverflow.com/questions/3748037/how-to-control-a-kiwi-drive-robot
+    {
 
         double max;
 
         // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-        double axial = movementY;
-        double lateral = movementX;
-        double yaw =  rotation;
+        //double axial = movementY;
+        //double lateral =  movementX;
+        //double yaw =  rotation;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.
-        double leftFrontPower  = axial + lateral + yaw;
-        double rightFrontPower = axial - lateral - yaw;
-        double leftBackPower   = axial - lateral + yaw;
-        double rightBackPower  = axial + lateral - yaw;
+
+        double FrontLeft  = movementY + movementX + rotation;
+        double FrontRight = movementY - movementX - rotation;
+        //double FrontLeft  = -1/2*movementX - Math.sqrt(3)/2*movementY + rotation;
+        //double FrontRight = -1/2*movementX + Math.sqrt(3)/2*movementY + rotation;
+        double Rear   = movementX;
 
         // Normalize the values so no wheel power exceeds 100%
         // This ensures that the robot maintains the desired motion.
-        max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
-        max = Math.max(max, Math.abs(leftBackPower));
-        max = Math.max(max, Math.abs(rightBackPower));
+        max = Math.max(Math.abs(FrontLeft), Math.abs(FrontRight));
+        max = Math.max(max, Math.abs(Rear));
+
 
         if (max > 1.0) {
-            leftFrontPower  /= max;
-            rightFrontPower /= max;
-            leftBackPower   /= max;
-            rightBackPower  /= max;
+            FrontLeft  /= max;
+            FrontRight /= max;
+            Rear   /= max;
         }
 
         // Send calculated power to wheels
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftBackDrive.setPower(leftBackPower);
-        rightBackDrive.setPower(rightBackPower);
+        leftFrontDrive.setPower(FrontLeft);
+        rightFrontDrive.setPower(FrontRight);
+        rearDrive.setPower(Rear);
 
-        telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
-        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-        telemetry.update();
     }
 
 
     // Function to control slides. Pass -1 to lower, 0 to halt, 1 to raise
     public void setSlidePos(double power) {
-        slideServoA.setPower(power);
-        slideServoB.setPower(power);
-        slideServoC.setPower(power);
+        //.setPower(power);
+        //slideServoB.setPower(power);
+        //slideServoC.setPower(power);
+        slideMotor.setPower(power);
     }
 
 
@@ -314,7 +313,9 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
 
     // Non color sensor stuff
     boolean cameraError = false;
-    double timeX;
+    double timeXpos;
+    double timeXneg;
+
     double timeY;
     float externalJunctionPointX;
     float externalJunctionPointY;
@@ -402,24 +403,24 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
+        rearDrive  = hardwareMap.get(DcMotor.class, "rear_drive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        slideMotor = hardwareMap.get(DcMotor.class, "slide_motor");
         clawServo = hardwareMap.get(Servo.class, "claw_servo");
-        slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
-        slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
-        slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
+        //slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
+        //slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
+        //slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rearDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
-        slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
-        slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
+        slideMotor.setDirection(DcMotor.Direction.FORWARD);
+        //slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        //slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
+        //slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
 
@@ -518,8 +519,10 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
                 telemetry.update();
             }*/
 
-            double oldtimex = 0;
+            double oldtimexpos = 0;
+            double oldtimexneg = 0;
             double oldtimey = 0;
+            double signXlastframe = 0;
 
             telemetry.addData("Step", "Rotation end");
             telemetry.update();
@@ -534,18 +537,31 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
                     {
                         // Clever little bit of code to avoid ifs. Gets sign of where we want the point - the actual point, then moves in the appropreate direction
                         signX = Math.signum(175 - externalJunctionPointX); //formerly 320
+                        signXlastframe = signX;
                         setMotorInstruction(0, FORWARD_SPEED * signX * 0.25, 0);
                         runtime.reset();
-                        while (opModeIsActive() && !(externalJunctionPointX >= 170 && externalJunctionPointX <= 180)) // loop until detectPoles.getTargetPointX is between 310 and 330
+                        while (opModeIsActive() && !(externalJunctionPointX >= 170 && externalJunctionPointX <= 180) && signXlastframe == signX) // loop until detectPoles.getTargetPointX is between 310 and 330
                         {
+                            signX = Math.signum(175 - externalJunctionPointX); //formerly 320
                             telemetry.addData("Funni number 1", externalJunctionPointX);
                             telemetry.update();
                         }
 
-                        timeX = runtime.seconds() + oldtimex;
-                        runtime.reset();
+                        if(signX > 0)
+                        {
+                            timeXpos = runtime.seconds() + oldtimexpos;
+                            runtime.reset();
 
-                        oldtimex = timeX;
+                            oldtimexpos = timeXpos;
+                        }
+                        else
+                        {
+                            timeXneg = runtime.seconds() + oldtimexneg;
+                            runtime.reset();
+
+                            oldtimexneg = timeXneg;
+                        }
+
                     }
                     else
                     {
@@ -649,9 +665,22 @@ public class PoleDetectionOpModeLeftArena extends LinearOpMode
 
         }
 
-        setMotorInstruction(0, FORWARD_SPEED * -signX * 0.25, 0); //reverse X axis driving
+        setMotorInstruction(0, -FORWARD_SPEED * 0.25, 0); //reverse X axis driving pos
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < timeX)) {
+        while (opModeIsActive() && (runtime.seconds() < timeXpos)) {
+
+        }
+
+        // Stop to minimize impact of inertia
+        setMotorInstruction(0, 0, 0);
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 0.3)) {
+
+        }
+
+        setMotorInstruction(0, FORWARD_SPEED * 0.25, 0); //reverse X axis driving neg
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < timeXneg)) {
 
         }
 

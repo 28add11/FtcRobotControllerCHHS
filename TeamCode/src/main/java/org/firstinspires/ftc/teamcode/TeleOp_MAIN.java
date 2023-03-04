@@ -72,13 +72,13 @@ public class TeleOp_MAIN extends LinearOpMode {
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
+    private DcMotor rearDrive = null;
+    private DcMotor slideMotor = null;
     private Servo clawServo;
-    private CRServo slideServoA;
-    private CRServo slideServoB;
-    private CRServo slideServoC;
+    //private CRServo slideServoA;
+    //private CRServo slideServoB;
+    //private CRServo slideServoC;
 
     // Servo stuff
     static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each CYCLE_MS cycle
@@ -96,7 +96,7 @@ public class TeleOp_MAIN extends LinearOpMode {
     boolean buttonAPressed = false;
     //Servo stuff end
 
-    //movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
+    /*//movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
     public void setMotorInstruction(double movementY, double movementX, double rotation) {
 
         double max;
@@ -135,6 +135,44 @@ public class TeleOp_MAIN extends LinearOpMode {
         telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
         telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
         //telemetry.update();
+    }*/
+
+    public void setMotorInstruction(double movementY, double movementX, double rotation) //based off of https://stackoverflow.com/questions/3748037/how-to-control-a-kiwi-drive-robot
+    {
+
+        double max;
+
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        //double axial = movementY;
+        //double lateral =  movementX;
+        //double yaw =  rotation;
+
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+
+        double FrontLeft  = movementY + movementX + rotation;
+        double FrontRight = movementY - movementX - rotation;
+        //double FrontLeft  = -1/2*movementX - Math.sqrt(3)/2*movementY + rotation;
+        //double FrontRight = -1/2*movementX + Math.sqrt(3)/2*movementY + rotation;
+        double Rear   = movementX;
+
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(FrontLeft), Math.abs(FrontRight));
+        max = Math.max(max, Math.abs(Rear));
+
+
+        if (max > 1.0) {
+            FrontLeft  /= max;
+            FrontRight /= max;
+            Rear   /= max;
+        }
+
+        // Send calculated power to wheels
+        leftFrontDrive.setPower(FrontLeft);
+        rightFrontDrive.setPower(FrontRight);
+        rearDrive.setPower(Rear);
+
     }
 
     @Override
@@ -143,13 +181,13 @@ public class TeleOp_MAIN extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        rightFrontDrive  = hardwareMap.get(DcMotor.class, "right_front_drive");
+        rearDrive = hardwareMap.get(DcMotor.class, "rear_drive");
+        slideMotor = hardwareMap.get(DcMotor.class, "slide_motor");
         clawServo = hardwareMap.get(Servo.class, "claw_servo");
-        slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
-        slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
-        slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
+        //slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
+        //slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
+        //slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -161,13 +199,13 @@ public class TeleOp_MAIN extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);  //may need tweaking
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
-        slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
-        slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
+        rearDrive.setDirection(DcMotor.Direction.FORWARD);
+        slideMotor.setDirection(DcMotor.Direction.FORWARD);
+        //slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        //slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
+        //slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -249,9 +287,10 @@ public class TeleOp_MAIN extends LinearOpMode {
             telemetry.addData(">", "Press Stop to end test." );
             // Set the servo to the new position and pause;
             clawServo.setPosition(clawPos);
-            slideServoA.setPower(slidePower);
-            slideServoB.setPower(slidePower);
-            slideServoC.setPower(slidePower);
+            //slideServoA.setPower(slidePower);
+            //slideServoB.setPower(slidePower);
+            //slideServoC.setPower(slidePower);
+            slideMotor.setPower(slidePower);
             sleep(CYCLE_MS);
             idle();
 
