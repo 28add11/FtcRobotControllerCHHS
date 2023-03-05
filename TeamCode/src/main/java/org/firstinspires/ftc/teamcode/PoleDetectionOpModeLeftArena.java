@@ -23,6 +23,7 @@ package org.firstinspires.ftc.teamcode;
 
 //import android.graphics.Point; caused error in later imports
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -178,7 +179,7 @@ public class colorSensorDrive extends LinearOpMode {
 
 
 
-@TeleOp
+@Autonomous
 public class PoleDetectionOpModeLeftArena extends LinearOpMode
 {
     OpenCvWebcam webcam;

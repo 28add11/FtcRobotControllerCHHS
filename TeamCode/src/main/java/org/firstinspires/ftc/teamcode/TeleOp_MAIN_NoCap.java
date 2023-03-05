@@ -31,9 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -65,9 +63,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="MAIN", group="Linear Opmode")
+@TeleOp(name="MAIN No Cap", group="Linear Opmode")
 //@Disabled
-public class TeleOp_MAIN extends LinearOpMode {
+public class TeleOp_MAIN_NoCap extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -271,7 +269,7 @@ public class TeleOp_MAIN extends LinearOpMode {
             }
 
             // if we switch the controls to the triggers, this is all we need
-            slidePower = (rightTrigger * (slideMotor.getCurrentPosition() <= maximum ? 1:0)) - (leftTrigger * (slideMotor.getCurrentPosition() >= 0 ? 1:0)) + (raiseSlide ? 1:0) - (lowerSlide ? 1:0);
+            slidePower = rightTrigger - leftTrigger + (raiseSlide ? 1:0) - (lowerSlide ? 1:0);
             if (slidePower > 1) {
                 slidePower = 1;
             }
