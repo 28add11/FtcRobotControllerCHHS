@@ -116,7 +116,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         while (opModeIsActive()) {
 
             double drive    =  gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double turn    =  gamepad1.right_stick_x;
+            double turn     =  gamepad1.right_stick_x;
 
             // SERVO STUFF
 
