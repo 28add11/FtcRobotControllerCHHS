@@ -23,18 +23,12 @@ package org.firstinspires.ftc.teamcode;
 
 //import android.graphics.Point; caused error in later imports
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Mat;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
@@ -42,142 +36,10 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.core.Point;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.lang.Math;
-
-
-/* WORK ON THIS LATER, IT'S TIME TO SLEEP! 
-
-public class colorSensorDrive extends LinearOpMode {
-
-
-    
-
-    
-
-
-    @Override
-    public void runOpMode() {
-
-
-
-        // Send telemetry message to signify robot waiting;
-        telemetry.addData("Status", "Ready to run");    //
-        telemetry.update();
-
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-
-        // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
-
-
-
-
-
-        // send the info back to driver station using telemetry function.
-        telemetry.addData("Clear", colorSensor.alpha());
-        telemetry.addData("Red  ", colorSensor.red());
-        telemetry.addData("Green", colorSensor.green());
-        telemetry.addData("Blue ", colorSensor.blue());
-        telemetry.update();
-
-
-        // Park RED
-        if(colorSensor.red() > colorSensor.green() && colorSensor.red() > colorSensor.blue()) //red is location 1
-        {
-            scenario = 0;
-
-            
-
-
-
-            //drive left
-            setMotorInstruction(-FORWARD_SPEED, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-        }
-
-        // Park GREEN
-        if(colorSensor.green() > colorSensor.red() && colorSensor.green() > colorSensor.blue()) //green is location 2
-        {
-            scenario = 1;
-
-            // Do nothing lmao
-        }
-
-        // Park BLUE
-        if(colorSensor.blue() > colorSensor.green() && colorSensor.blue() > colorSensor.red()) //blue is location 3
-        {
-            scenario = 2;
-
-            // In order to prevent the cones from getting stuck in the wheels, this code
-            // pushes the cone forward and moves back to its original spot
-            setMotorInstruction(0, -FORWARD_SPEED, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-            // Stop to minimize impact of inertia
-            setMotorInstruction(0, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-            // Run it back
-            setMotorInstruction(0, FORWARD_SPEED, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-            // Stop to minimize impact of inertia
-            setMotorInstruction(0, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 0.5)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-
-
-            // Drive right
-            setMotorInstruction(FORWARD_SPEED, 0, 0);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 1.3)) {
-                telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
-                telemetry.update();
-            }
-
-        }
-
-        telemetry.addData("Scenario", scenario);
-
-        telemetry.update();
-
-        // Step 2:  Stop
-        setMotorInstruction(0, 0, 0);
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-        sleep(1000);
-    }
-}
-*/
-
-
 
 
 @TeleOp
@@ -186,15 +48,9 @@ public class PoleDetectionOpMode extends LinearOpMode
     OpenCvWebcam webcam;
 
 
-    // Declare OpMode members for each of the 4 motors.
-    private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
-    private Servo clawServo;
-    private CRServo slideServoA;
-    private CRServo slideServoB;
-    private CRServo slideServoC;
+    // Declare OpMode members for each of the 2 motors.
+    private DcMotor rightMotor = null;
+    private DcMotor leftMotor = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -202,100 +58,36 @@ public class PoleDetectionOpMode extends LinearOpMode
     static final double FORWARD_SPEED = 0.6;
     static final double ROTATION_SPEED = 0.6;
     // Servo stuff
-    static final double INCREMENT_CLAW  =         0.06;     // amount to slew claw servo each cycle
-    static final double INCREMENT_SLIDE =         0.10;     // amount to slew slide servo
-    static final double MAX_POS         =          1.0;     // Maximum rotational position (tested: 1.0 = 270 degrees)
-    static final double MIN_POS         =          0.0;     // Minimum rotational position
-    static final double MAX_CLAW        =   45.0/270.0;     // Maximum rotational position for the claw
 
     // Define class members
 
-    double clawPos = (MIN_POS);  // Start at 0
-    double slidePower = (MIN_POS); // Start at 0
-    boolean clawActivated = false;
-    boolean buttonAPressed = false;
     //Servo stuff end
 
     // Method that simplifies instruction for movement, math required to determine power is done here
     // Is a copy of math done from a template, and is in use in our main program
 
-    // movementY is forward-back movement (negative backwards positive forwards),
-    // movementX is left-right movement (negative left positive right).
-    public void setMotorInstruction(double movementY, double movementX, double rotation) {
+    // Turn is emulating the right joystick X value, drive emulating left Y value
 
-        double max;
+    // If we want we could theoretically record someone's movements for auto,
+    // but realistically that would be pointless this season
+    public void setMotorInstruction(double turn, double drive) {
 
-        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-        double axial = movementY;
-        double lateral = movementX;
-        double yaw =  rotation;
+        double leftPower;
+        double rightPower;
 
-        // Combine the joystick requests for each axis-motion to determine each wheel's power.
-        // Set up a variable for each drive wheel to save the power level for telemetry.
-        double leftFrontPower  = axial + lateral + yaw;
-        double rightFrontPower = axial - lateral - yaw;
-        double leftBackPower   = axial - lateral + yaw;
-        double rightBackPower  = axial + lateral - yaw;
-
-        // Normalize the values so no wheel power exceeds 100%
-        // This ensures that the robot maintains the desired motion.
-        max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
-        max = Math.max(max, Math.abs(leftBackPower));
-        max = Math.max(max, Math.abs(rightBackPower));
-
-        if (max > 1.0) {
-            leftFrontPower  /= max;
-            rightFrontPower /= max;
-            leftBackPower   /= max;
-            rightBackPower  /= max;
-        }
+        // POV Mode uses left joystick to go forward & back, and right joystick to rotate.
+        leftPower    = Range.clip(drive + turn, -1.0, 1.0);
+        rightPower   = Range.clip(drive - turn, -1.0, 1.0);
 
         // Send calculated power to wheels
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftBackDrive.setPower(leftBackPower);
-        rightBackDrive.setPower(rightBackPower);
+        leftMotor.setPower(leftPower);
+        rightMotor.setPower(rightPower);
 
-        telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
-        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-        telemetry.update();
+        telemetry.addData("Left", "%4.2f", leftPower);
+        telemetry.addData("Right", "%4.2f", rightPower);
+        //telemetry.update();
     }
 
-
-    // Function to control slides. Pass -1 to lower, 0 to halt, 1 to raise
-    public void setSlidePos(double raseLower) {
-        slideServoA.setPower(slidePower);
-        slideServoB.setPower(slidePower);
-        slideServoC.setPower(slidePower);
-    }
-
-
-    public void moveClaw(boolean clawActivated) {
-        do {
-            if (clawActivated) {
-                // Keep stepping up until we hit the max value.
-                clawPos += INCREMENT_CLAW;
-                if (clawPos > MAX_CLAW ) {
-                    clawPos = MAX_CLAW;
-                }
-            } else {
-                // Keep stepping down until we hit the min value.
-                clawPos -= INCREMENT_CLAW;
-                if (clawPos < MIN_POS ) {
-                    clawPos = MIN_POS;
-                }
-
-            }
-        
-            clawServo.setPosition(clawPos);
-            sleep(70);
-        } while (clawPos != MAX_CLAW || clawPos != MIN_POS);
-    }
-
-    // Color sensor side of things setup
-    ColorSensor colorSensor;    // Hardware Device Object
-
-    int scenario = 0; //0 is parking location 1, 1 is parking location 2, 2 is parking location three
 
     // Non color sensor stuff
     boolean cameraError = false;
@@ -307,105 +99,18 @@ public class PoleDetectionOpMode extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        /*
-         * Instantiate an OpenCvCamera object for the camera we'll be using.
-         * In this sample, we're using a webcam. Note that you will need to
-         * make sure you have added the webcam to your configuration file and
-         * adjusted the name here to match what you named it in said config file.
-         *
-         * We pass it the view that we wish to use for camera monitor (on
-         * the RC phone). If no camera monitor is desired, use the alternate
-         * single-parameter constructor instead (commented out below)
-         */
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        // OR...  Do Not Activate the Camera Monitor View
-        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
-
-        /*
-         * Specify the image processing pipeline we wish to invoke upon receipt
-         * of a frame from the camera. Note that switching pipelines on-the-fly
-         * (while a streaming session is in flight) *IS* supported.
-         */
-        webcam.setPipeline(new DetectPoles());
-
-        /*
-         * Open the connection to the camera device. New in v1.4.0 is the ability
-         * to open the camera asynchronously, and this is now the recommended way
-         * to do it. The benefits of opening async include faster init time, and
-         * better behavior when pressing stop during init (i.e. less of a chance
-         * of tripping the stuck watchdog)
-         *
-         * If you really want to open synchronously, the old method is still available.
-         */
-        webcam.setMillisecondsPermissionTimeout(5000); // Timeout for obtaining permission is configurable. Set before opening.
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                /*
-                 * Tell the webcam to start streaming images to us! Note that you must make sure
-                 * the resolution you specify is supported by the camera. If it is not, an exception
-                 * will be thrown.
-                 *
-                 * Keep in mind that the SDK's UVC driver (what OpenCvWebcam uses under the hood) only
-                 * supports streaming from the webcam in the uncompressed YUV image format. This means
-                 * that the maximum resolution you can stream at and still get up to 30FPS is 480p (640x480).
-                 * Streaming at e.g. 720p will limit you to up to 10FPS and so on and so forth.
-                 *
-                 * Also, we specify the rotation that the webcam is used in. This is so that the image
-                 * from the camera sensor can be rotated such that it is always displayed with the image upright.
-                 * For a front facing camera, rotation is defined assuming the user is looking at the screen.
-                 * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
-                 * away from the user.
-                 */
-
-                // Note: the YUV thing is a lie. That is the camera input format, but from the software side, 
-                //it inputs RGBA
-                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-                /*
-                 * This will be called if the camera could not be opened
-                 */
-                cameraError = true;
-            }
-        });
-
-
-        //COLORSENSOR SETUP
-
-        // get a reference to our ColorSensor object.
-        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color");
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
-        clawServo = hardwareMap.get(Servo.class, "claw_servo");
-        slideServoA = hardwareMap.get(CRServo.class, "slide_servo_a");
-        slideServoB = hardwareMap.get(CRServo.class, "slide_servo_b");
-        slideServoC = hardwareMap.get(CRServo.class, "slide_servo_c");
+        leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
+        rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        slideServoA.setDirection(DcMotorSimple.Direction.FORWARD);
-        slideServoB.setDirection(DcMotorSimple.Direction.FORWARD);
-        slideServoC.setDirection(DcMotorSimple.Direction.FORWARD);
-
-
+        leftMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightMotor.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.addLine("Waiting for start");
         telemetry.update();

@@ -47,7 +47,7 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 public class TeleOp_MAIN extends LinearOpMode {
 
-    // Declare OpMode members for each of the 4 motors.
+    // Declare OpMode members for each of the 2 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor rightMotor = null;
     private DcMotor leftMotor = null;
