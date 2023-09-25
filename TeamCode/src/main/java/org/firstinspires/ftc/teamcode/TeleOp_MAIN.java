@@ -52,6 +52,8 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightMotor = null;
     private DcMotor leftMotor = null;
 
+    private DcMotor speen = null;
+
     // Servo stuff
     static final int    CYCLE_MS        =           50;     // period of each cycle
     // Define class members
@@ -84,6 +86,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
         rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
+        speen = hardwareMap.get(DcMotor.class, "spinner");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -124,7 +127,11 @@ public class TeleOp_MAIN extends LinearOpMode {
             // Motor Control
             setMotorInstruction(drive, turn);
 
-
+            if (gamepad1.a) {
+                speen.setPower(1);
+            } else {
+                speen.setPower(0);
+            }
 
             sleep(CYCLE_MS);
             idle();
