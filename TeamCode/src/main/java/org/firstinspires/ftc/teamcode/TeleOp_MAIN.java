@@ -125,7 +125,7 @@ public class TeleOp_MAIN extends LinearOpMode {
 
 
             // Motor Control
-            setMotorInstruction(drive, turn);
+            setMotorInstruction(drive, -turn);
 
             if (gamepad1.a) {
                 speen.setPower(1);
