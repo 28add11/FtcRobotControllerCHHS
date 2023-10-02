@@ -129,6 +129,32 @@ public class CenterstageAuto extends LinearOpMode
          */
         waitForStart();
 
+        // Reset the encoder
+        //start
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftMotor.setTargetPosition(700);
+        rightMotor.setTargetPosition(700);
+
+        // Switch to RUN_TO_POSITION mode
+        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //this is switching the encoder mode to RUN_TO_POSITION
+
+        static private double autoSpeed = 0.5; //Placeholder value, can be changed later
+        //SPEED
+        leftMotor.setPower(autoSpeed);
+        rightMotor.setPower(autoSpeed);
+
+        while (leftMotor.isBusy() && rightMotor.isBusy()) {
+            leftMotor.setPower(autoSpeed);
+            rightMotor.setPower(autoSpeed);
+        }
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+        //this makes the motors continue to run until they reach the correct encoder value.
+
     }
 
 }
