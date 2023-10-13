@@ -100,6 +100,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
         leftMotor.setDirection(DcMotor.Direction.FORWARD);
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
+        speen.setDirection((DcMotorSimple.Direction.REVERSE));
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
