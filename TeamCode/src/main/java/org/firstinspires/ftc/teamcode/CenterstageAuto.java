@@ -31,12 +31,24 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import android.util.Size;
+import org.opencv.imgproc.Imgproc;
+
 
 import java.lang.Math;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import android.graphics.Canvas;
 
 
 @TeleOp
@@ -45,7 +57,7 @@ public class CenterstageAuto extends LinearOpMode
 
     // Computer vision stuff
     AprilTagProcessor aprilTags;
-    VisionPortal.Builder VisionPortalBuilder;
+    //VisionPortal.Builder VisionPortalBuilder;
     VisionPortal visionPortal;
 
 
@@ -91,7 +103,6 @@ public class CenterstageAuto extends LinearOpMode
 
 
     // Non color sensor stuff
-    boolean cameraError = false;
     double timeX;
     double timeY;
     float externalJunctionPointX;
@@ -119,7 +130,14 @@ public class CenterstageAuto extends LinearOpMode
         aprilTags = AprilTagProcessor.easyCreateWithDefaults();
 
         // Create a new VisionPortal.
-        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam"), aprilTags);
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .addProcessor(new autoPipeline())
+                .setCameraResolution(new Size(640, 480))
+                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
+                .enableLiveView(true)
+                .setAutoStopLiveView(true)
+                .build();
 
         telemetry.addLine("Waiting for start");
         telemetry.update();
@@ -129,6 +147,49 @@ public class CenterstageAuto extends LinearOpMode
          */
         waitForStart();
 
+        while (opModeIsActive()) {
+            /*
+             * Send some stats to the telemetry
+             */
+            /*
+            telemetry.addData("Frame Count", camera.getFrameCount());
+            telemetry.addData("FPS", String.format("%.2f", camera.getFps()));
+            telemetry.addData("Total frame time ms", camera.getTotalFrameTimeMs());
+            telemetry.addData("Pipeline time ms", camera.getPipelineTimeMs());
+            telemetry.addData("Overhead time ms", camera.getOverheadTimeMs());
+            telemetry.addData("Theoretical max FPS", camera.getCurrentPipelineMaxFps());
+            telemetry.update();
+            */
+
+            /*
+             * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
+             * excess CPU cycles for no reason. (By default, telemetry is only sent to the DS at 4Hz
+             * anyway). Of course in a real OpMode you will likely not want to do this.
+             */
+            sleep(100);
+        }
+
+    }
+
+
+    class autoPipeline implements VisionProcessor
+    {
+
+        @Override
+        public void init(int width, int height, org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration calibration)
+        {
+
+        }
+        @Override
+        public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext)
+        {
+
+        }
+        @Override
+        public Mat processFrame(Mat input, long captureTimeNanos)
+        {
+            return input;
+        }
     }
 
 }
