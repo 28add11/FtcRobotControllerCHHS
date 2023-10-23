@@ -101,6 +101,31 @@ public class CenterstageAuto extends LinearOpMode
         //telemetry.update();
     }
 
+    public void driveDistance(double distance, double speed){
+        // Reset the encoder
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        int count = (distance/(Math.PI*0.1))*732 //Distance in meters
+
+        leftMotor.setTargetPosition(count/2);
+        rightMotor.setTargetPosition(count/2);
+
+        // Switch to RUN_TO_POSITION mode
+        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //SPEED
+        leftMotor.setPower(speed);
+        rightMotor.setPower(speed);
+
+        while (leftMotor.isBusy() && rightMotor.isBusy()) {
+            leftMotor.setPower(speed);
+            rightMotor.setPower(speed);
+        }
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+        //this makes the motors continue to run until they reach the correct encoder value.
+    }
 
     // Non color sensor stuff
     double timeX;
