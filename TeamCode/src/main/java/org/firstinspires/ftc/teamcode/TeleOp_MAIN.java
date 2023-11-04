@@ -158,6 +158,7 @@ public class TeleOp_MAIN extends LinearOpMode {
                 speen.setPower(0);
             }
 
+            planeLauncher.setPosition(launcherPOS);
             sleep(CYCLE_MS);
             idle();
 
