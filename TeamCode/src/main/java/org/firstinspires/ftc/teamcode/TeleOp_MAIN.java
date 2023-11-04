@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -55,6 +56,13 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor speen = null;
 
     // Servo stuff
+    private Servo planeLauncher = null;
+    static final double MIN_LAUNCHER = 0;
+    static final double MAX_LAUNCHER       =   90.0/270.0;     // Maximum rotational position for the launcher servo
+    double incrumentLauncher = 0.1;
+
+    double launcherPOS = (MIN_LAUNCHER);
+
     static final int    CYCLE_MS        =           50;     // period of each cycle
     // Define class members
 
@@ -87,6 +95,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
         rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
         speen = hardwareMap.get(DcMotor.class, "spinner");
+        planeLauncher = hardwareMap.get(Servo.class, "launcher");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -123,6 +132,21 @@ public class TeleOp_MAIN extends LinearOpMode {
             double turn     =  gamepad1.right_stick_x;
 
             // SERVO STUFF
+
+            if (gamepad1.b) {
+                // Keep stepping up until we hit the max value.
+                launcherPOS += incrumentLauncher;
+                if (launcherPOS > MAX_LAUNCHER ) {
+                    launcherPOS = MAX_LAUNCHER;
+                }
+            }
+            else {
+                // Keep stepping down until we hit the min value.
+                launcherPOS -= incrumentLauncher;
+                if (launcherPOS < MIN_LAUNCHER ) {
+                    launcherPOS = MIN_LAUNCHER;
+                }
+            }
 
 
             // Motor Control
