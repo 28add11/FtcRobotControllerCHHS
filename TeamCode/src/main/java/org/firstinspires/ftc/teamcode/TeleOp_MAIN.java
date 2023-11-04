@@ -62,6 +62,8 @@ public class TeleOp_MAIN extends LinearOpMode {
     double incrumentLauncher = 0.1;
 
     double launcherPOS = (MIN_LAUNCHER);
+    boolean launched = false;
+    boolean buttonBpressed = false; //Serves to make sure launched doesn't oscillate every cycle
 
     static final int    CYCLE_MS        =           50;     // period of each cycle
     // Define class members
@@ -132,8 +134,14 @@ public class TeleOp_MAIN extends LinearOpMode {
             double turn     =  gamepad1.right_stick_x;
 
             // SERVO STUFF
+            if (gamepad1.b && !buttonBpressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+                launched = !launched;
+                buttonBpressed = true;
+            } else if (buttonBpressed && !gamepad1.b) { //if no button was pressed and ispressed is true, then...
+                buttonBpressed = false;
+            }
 
-            if (gamepad1.b) {
+            if (launched) {
                 // Keep stepping up until we hit the max value.
                 launcherPOS += incrumentLauncher;
                 if (launcherPOS > MAX_LAUNCHER ) {
