@@ -102,13 +102,14 @@ public class CenterstageAuto extends LinearOpMode
     }
 
     public void driveDistance(double distance, double speed){
+
         // Reset the encoder
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        int count = (distance/(Math.PI*0.1))*732 //Distance in meters
+        double count = (distance/(Math.PI*0.1))*732; //Distance in meters
 
-        leftMotor.setTargetPosition(count/2);
-        rightMotor.setTargetPosition(count/2);
+        leftMotor.setTargetPosition((int)count/2);
+        rightMotor.setTargetPosition((int)count/2);
 
         // Switch to RUN_TO_POSITION mode
         leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -154,9 +155,11 @@ public class CenterstageAuto extends LinearOpMode
         // Create the AprilTag processor and assign it to a variable.
         aprilTags = AprilTagProcessor.easyCreateWithDefaults();
 
+
         // Create a new VisionPortal.
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .addProcessors(aprilTags)
                 .addProcessor(new autoPipeline())
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
@@ -213,7 +216,16 @@ public class CenterstageAuto extends LinearOpMode
         @Override
         public Mat processFrame(Mat input, long captureTimeNanos)
         {
-            return input;
+            Mat RGBsource = new Mat();
+            Mat HSVsource = new Mat();
+
+            Mat redFilter = new Mat();
+
+            Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_RGBA2RGB);
+            Imgproc.cvtColor(RGBsource, HSVsource, Imgproc.COLOR_RGB2HSV);
+
+            Core.inRange(HSVsource, new Scalar(0, 0, 0), new Scalar(100, 100, 100), redFilter);
+            return redFilter;
         }
     }
 
