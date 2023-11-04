@@ -57,8 +57,8 @@ public class TeleOp_MAIN extends LinearOpMode {
 
     // Servo stuff
     private Servo planeLauncher = null;
-    static final double MIN_LAUNCHER = 0;
-    static final double MAX_LAUNCHER       =   90.0/270.0;     // Maximum rotational position for the launcher servo
+    static final double MIN_LAUNCHER = 90.0/270.0;
+    static final double MAX_LAUNCHER       =   180.0/270.0;     // Maximum rotational position for the launcher servo
     double incrumentLauncher = 0.1;
 
     double launcherPOS = (MIN_LAUNCHER);
