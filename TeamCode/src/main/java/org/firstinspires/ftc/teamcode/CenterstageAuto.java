@@ -22,6 +22,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -51,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 import android.graphics.Canvas;
 
 
-@TeleOp
+@Autonomous()
 public class CenterstageAuto extends LinearOpMode
 {
 
@@ -108,12 +109,12 @@ public class CenterstageAuto extends LinearOpMode
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         double count = (distance/(Math.PI*0.1))*732; //Distance in meters
 
-        leftMotor.setTargetPosition((int)count/2);
-        rightMotor.setTargetPosition((int)count/2);
-
         // Switch to RUN_TO_POSITION mode
         leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftMotor.setTargetPosition((int)count);
+        rightMotor.setTargetPosition((int)count);
 
         //SPEED
         leftMotor.setPower(speed);
@@ -126,6 +127,10 @@ public class CenterstageAuto extends LinearOpMode
         leftMotor.setPower(0);
         rightMotor.setPower(0);
         //this makes the motors continue to run until they reach the correct encoder value.
+
+        // Switch to normal mode
+        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     // Non color sensor stuff
@@ -174,6 +179,10 @@ public class CenterstageAuto extends LinearOpMode
          * Wait for the user to press start on the Driver Station
          */
         waitForStart();
+
+        setMotorInstruction(0.75, 0 );
+        sleep(1000);
+        driveDistance(0.75, 1); //Auto segment to park
 
         while (opModeIsActive()) {
             /*
