@@ -107,7 +107,7 @@ public class CenterstageAuto extends LinearOpMode
         // Reset the encoder
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        double count = (distance/(Math.PI*0.1))*732; //Distance in meters
+        double count = (distance/(Math.PI*0.1)*(60/1))*732; //Distance in meters
 
         // Switch to RUN_TO_POSITION mode
         leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
