@@ -54,6 +54,7 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor leftMotor = null;
 
     private DcMotor speen = null;
+    private DcMotor arm = null;
 
     // Servo stuff
     private Servo planeLauncher = null;
@@ -64,6 +65,20 @@ public class TeleOp_MAIN extends LinearOpMode {
     double launcherPOS = (MIN_LAUNCHER);
     boolean launched = false;
     boolean buttonBpressed = false; //Serves to make sure launched doesn't oscillate every cycle
+
+    private Servo pincherR = null;
+    private Servo pincherL = null;
+
+    static final double MIN_PINCHER = 0.0/270.0;
+
+    static final double MID_PINCHER = 45.0/270.0;
+    static final double MAX_PINCHER       =   90.0/270.0;     // Maximum rotational position for the launcher servo
+    double incrumentPincher = 0.1;
+
+    double leftPincherPOS = (MID_PINCHER);
+    double rightPincherPOS = (MID_PINCHER);
+    boolean pinch = false;
+    boolean buttonXpressed = false; //Serves to make sure launched doesn't oscillate every cycle
 
     static final int    CYCLE_MS        =           50;     // period of each cycle
     // Define class members
@@ -97,7 +112,12 @@ public class TeleOp_MAIN extends LinearOpMode {
         leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
         rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
         speen = hardwareMap.get(DcMotor.class, "spinner");
+        arm = hardwareMap.get(DcMotor.class, "arm");
         planeLauncher = hardwareMap.get(Servo.class, "launcher");
+
+        pincherR = hardwareMap.get(Servo.class, "rightPinch");
+        pincherL = hardwareMap.get(Servo.class, "leftPinch");
+
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -111,7 +131,9 @@ public class TeleOp_MAIN extends LinearOpMode {
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
         leftMotor.setDirection(DcMotor.Direction.FORWARD);
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
-        speen.setDirection((DcMotorSimple.Direction.REVERSE));
+        speen.setDirection(DcMotor.Direction.REVERSE);
+        arm.setDirection(DcMotor.Direction.FORWARD);
+
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -141,6 +163,13 @@ public class TeleOp_MAIN extends LinearOpMode {
                 buttonBpressed = false;
             }
 
+            if (gamepad1.x && !buttonXpressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+                pinch = !pinch;
+                buttonXpressed = true;
+            } else if (buttonXpressed && !gamepad1.x) { //if no button was pressed and ispressed is true, then...
+                buttonXpressed = false;
+            }
+
             if (launched) {
                 // Keep stepping up until we hit the max value.
                 launcherPOS += incrumentLauncher;
@@ -156,6 +185,29 @@ public class TeleOp_MAIN extends LinearOpMode {
                 }
             }
 
+            if (pinch) {
+                // Keep stepping up until we hit the max value.
+                leftPincherPOS += incrumentPincher;
+                rightPincherPOS -= incrumentPincher;
+                if (leftPincherPOS > MAX_PINCHER) {
+                    leftPincherPOS = MAX_PINCHER;
+                }
+                if (rightPincherPOS < MIN_PINCHER) {
+                    rightPincherPOS = MIN_PINCHER;
+                }
+            }
+            else {
+                // Keep stepping down until we hit the min value.
+                leftPincherPOS -= incrumentPincher;
+                rightPincherPOS += incrumentPincher;
+                if (leftPincherPOS < MID_PINCHER ) {
+                    leftPincherPOS = MID_PINCHER;
+                }
+                if (rightPincherPOS > MID_PINCHER ) {
+                    rightPincherPOS = MID_PINCHER;
+                }
+            }
+
 
             // Motor Control
             setMotorInstruction(drive, -turn);
@@ -167,6 +219,8 @@ public class TeleOp_MAIN extends LinearOpMode {
             }
 
             planeLauncher.setPosition(launcherPOS);
+            pincherL.setPosition(leftPincherPOS);
+            pincherR.setPosition(rightPincherPOS);
             sleep(CYCLE_MS);
             idle();
 
