@@ -55,12 +55,12 @@ public class TeleOp_MAIN extends LinearOpMode {
 
     private DcMotor armL = null;
     private DcMotor armR = null;
-    double armSpeed = 0.6;
+    private DcMotor extend = null;
 
     // Servo stuff
     private Servo planeLauncher = null;
     static final double MIN_LAUNCHER = 90.0/270.0;
-    static final double MAX_LAUNCHER       =   180.0/270.0;     // Maximum rotational position for the launcher servo
+    static final double MAX_LAUNCHER       =   0.0/270.0;     // Maximum rotational position for the launcher servo
     double incrumentLauncher = 0.1;
 
     double launcherPOS = (MIN_LAUNCHER);
@@ -114,6 +114,7 @@ public class TeleOp_MAIN extends LinearOpMode {
         rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
         armL = hardwareMap.get(DcMotor.class, "armLeft");
         armR = hardwareMap.get(DcMotor.class, "armRight");
+        extend = hardwareMap.get(DcMotor.class, "extender");
         planeLauncher = hardwareMap.get(Servo.class, "launcher");
 
         pincherR = hardwareMap.get(Servo.class, "rightPinch");
@@ -165,10 +166,10 @@ public class TeleOp_MAIN extends LinearOpMode {
                 buttonBpressed = false;
             }
 
-            if (gamepad1.x && !buttonXpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
+            if (gamepad2.x && !buttonXpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
                 pinch = !pinch;
                 buttonXpressed = true;
-            } else if (buttonXpressed && !gamepad1.x) { //if no button was pressed and ispressed is true, then...
+            } else if (buttonXpressed && !gamepad2.x) { //if no button was pressed and ispressed is true, then...
                 buttonXpressed = false;
             }
 
@@ -214,17 +215,11 @@ public class TeleOp_MAIN extends LinearOpMode {
             // Motor Control
             setMotorInstruction(drive, -turn);
 
-            if (gamepad2.left_bumper) {
-                armL.setPower(armSpeed);
-                armR.setPower(armSpeed);
-            } else if (gamepad2.right_bumper) {
-                armL.setPower(-armSpeed);
-                armR.setPower(-armSpeed);
 
-            } else{
-                armL.setPower(0);
-                armR.setPower(0);
-            }
+            armL.setPower(gamepad2.left_stick_y);
+            armR.setPower(gamepad2.left_stick_y);
+            extend.setPower(gamepad2.right_stick_y);
+
 
             planeLauncher.setPosition(launcherPOS);
             pincherL.setPosition(leftPincherPOS);
