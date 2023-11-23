@@ -53,8 +53,9 @@ public class TeleOp_MAIN extends LinearOpMode {
     private DcMotor rightMotor = null;
     private DcMotor leftMotor = null;
 
-    private DcMotor speen = null;
-    private DcMotor arm = null;
+    private DcMotor armL = null;
+    private DcMotor armR = null;
+    double armSpeed = 0.6;
 
     // Servo stuff
     private Servo planeLauncher = null;
@@ -111,8 +112,8 @@ public class TeleOp_MAIN extends LinearOpMode {
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
         rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
-        speen = hardwareMap.get(DcMotor.class, "spinner");
-        arm = hardwareMap.get(DcMotor.class, "arm");
+        armL = hardwareMap.get(DcMotor.class, "armLeft");
+        armR = hardwareMap.get(DcMotor.class, "armRight");
         planeLauncher = hardwareMap.get(Servo.class, "launcher");
 
         pincherR = hardwareMap.get(Servo.class, "rightPinch");
@@ -131,13 +132,14 @@ public class TeleOp_MAIN extends LinearOpMode {
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
         leftMotor.setDirection(DcMotor.Direction.FORWARD);
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
-        speen.setDirection(DcMotor.Direction.REVERSE);
-        arm.setDirection(DcMotor.Direction.FORWARD);
+        armL.setDirection(DcMotor.Direction.FORWARD);
+        armR.setDirection(DcMotor.Direction.REVERSE);
 
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
 
         waitForStart();
         runtime.reset();
@@ -156,14 +158,14 @@ public class TeleOp_MAIN extends LinearOpMode {
             double turn     =  gamepad1.right_stick_x;
 
             // SERVO STUFF
-            if (gamepad1.b && !buttonBpressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+            if (gamepad1.b && !buttonBpressed) {   //if the B button is pressed and was not pressed the previous mainloop cycle, then...
                 launched = !launched;
                 buttonBpressed = true;
             } else if (buttonBpressed && !gamepad1.b) { //if no button was pressed and ispressed is true, then...
                 buttonBpressed = false;
             }
 
-            if (gamepad1.x && !buttonXpressed) {   //if the A button is pressed and was not pressed the previous mainloop cycle, then...
+            if (gamepad1.x && !buttonXpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
                 pinch = !pinch;
                 buttonXpressed = true;
             } else if (buttonXpressed && !gamepad1.x) { //if no button was pressed and ispressed is true, then...
@@ -212,15 +214,23 @@ public class TeleOp_MAIN extends LinearOpMode {
             // Motor Control
             setMotorInstruction(drive, -turn);
 
-            if (gamepad1.a) {
-                speen.setPower(1);
-            } else {
-                speen.setPower(0);
+            if (gamepad2.left_bumper) {
+                armL.setPower(armSpeed);
+                armR.setPower(armSpeed);
+            } else if (gamepad2.right_bumper) {
+                armL.setPower(-armSpeed);
+                armR.setPower(-armSpeed);
+
+            } else{
+                armL.setPower(0);
+                armR.setPower(0);
             }
 
             planeLauncher.setPosition(launcherPOS);
             pincherL.setPosition(leftPincherPOS);
             pincherR.setPosition(rightPincherPOS);
+
+
             sleep(CYCLE_MS);
             idle();
 
