@@ -26,6 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -107,14 +108,14 @@ public class CenterstageAuto extends LinearOpMode
         // Reset the encoder
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        double count = (distance/(Math.PI*0.1)*(60/1))*732; //Distance in meters
+        double count = (distance/(Math.PI*0.1))*732; //Distance in meters
+
+        leftMotor.setTargetPosition((int)count);
+        rightMotor.setTargetPosition((int)count);
 
         // Switch to RUN_TO_POSITION mode
         leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        leftMotor.setTargetPosition((int)count);
-        rightMotor.setTargetPosition((int)count);
 
         //SPEED
         leftMotor.setPower(speed);
@@ -164,8 +165,7 @@ public class CenterstageAuto extends LinearOpMode
         // Create a new VisionPortal.
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .addProcessors(aprilTags)
-                .addProcessor(new autoPipeline())
+                .addProcessors(aprilTags, new autoPipeline())
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .enableLiveView(true)
@@ -180,9 +180,10 @@ public class CenterstageAuto extends LinearOpMode
          */
         waitForStart();
 
+        driveDistance(2.75, 1); //Auto segment to park
         setMotorInstruction(0.75, 0 );
-        sleep(1000);
-        driveDistance(0.75, 1); //Auto segment to park
+        sleep(900);
+        driveDistance(4, 1);
 
         while (opModeIsActive()) {
             /*
