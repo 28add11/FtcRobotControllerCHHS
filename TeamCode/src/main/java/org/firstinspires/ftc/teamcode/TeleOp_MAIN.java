@@ -166,10 +166,10 @@ public class TeleOp_MAIN extends LinearOpMode {
                 buttonBpressed = false;
             }
 
-            if (gamepad2.x && !buttonXpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
+            if (gamepad1.x && !buttonXpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
                 pinch = !pinch;
                 buttonXpressed = true;
-            } else if (buttonXpressed && !gamepad2.x) { //if no button was pressed and ispressed is true, then...
+            } else if (buttonXpressed && !gamepad1.x) { //if no button was pressed and ispressed is true, then...
                 buttonXpressed = false;
             }
 
@@ -216,9 +216,9 @@ public class TeleOp_MAIN extends LinearOpMode {
             setMotorInstruction(drive, -turn);
 
 
-            armL.setPower(gamepad2.left_stick_y);
-            armR.setPower(gamepad2.left_stick_y);
-            extend.setPower(gamepad2.right_stick_y);
+            armL.setPower(gamepad2.left_stick_y * 0.6);
+            armR.setPower(gamepad2.left_stick_y * 0.6);
+            extend.setPower(-gamepad2.right_stick_y);
 
 
             planeLauncher.setPosition(launcherPOS);
