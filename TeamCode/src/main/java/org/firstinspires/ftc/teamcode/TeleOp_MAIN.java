@@ -216,8 +216,8 @@ public class TeleOp_MAIN extends LinearOpMode {
             setMotorInstruction(drive, -turn);
 
 
-            armL.setPower(gamepad2.left_stick_y * 0.6);
-            armR.setPower(gamepad2.left_stick_y * 0.6);
+            armL.setPower(gamepad2.left_stick_y * 0.3);
+            armR.setPower(gamepad2.left_stick_y * 0.3);
             extend.setPower(-gamepad2.right_stick_y);
 
 

@@ -40,6 +40,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -223,19 +224,50 @@ public class CenterstageAuto extends LinearOpMode
         {
 
         }
+
+        Mat hierarchy = new Mat(); //It needs this for some reason
+        java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
+        Mat RGBsource = new Mat();
+        Mat HSVsource = new Mat();
+        Mat blur = new Mat();
+        Mat blueFilter = new Mat();
+        Mat canny = new Mat();
+        Mat lines = new Mat();
+
+        Mat left = new Mat(HSVsource, new Rect(0, 0, 427, 720));
+        Mat center = new Mat(HSVsource, new Rect(427, 0, 427, 720));
+        Mat right = new Mat(HSVsource, new Rect(853, 0, 426, 720));
+        int zone = -1;
         @Override
         public Mat processFrame(Mat input, long captureTimeNanos)
         {
-            Mat RGBsource = new Mat();
-            Mat HSVsource = new Mat();
 
-            Mat redFilter = new Mat();
+            java.util.List<MatOfPoint> contours = new java.util.ArrayList<MatOfPoint>();
+            java.util.List<MatOfPoint> leftCont = new java.util.ArrayList<MatOfPoint>();
+            java.util.List<MatOfPoint> centerCont = new java.util.ArrayList<MatOfPoint>();
+            java.util.List<MatOfPoint> rightCont = new java.util.ArrayList<MatOfPoint>();
 
             Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_RGBA2RGB);
             Imgproc.cvtColor(RGBsource, HSVsource, Imgproc.COLOR_RGB2HSV);
+            Imgproc.blur(HSVsource, blur, new org.opencv.core.Size(10, 10)); //apply blur to make errors in the tape less impactful
+            Core.inRange(blur, new Scalar(194, 60, 43), new Scalar(250, 100, 100), blueFilter);
+            Imgproc.Canny(blueFilter, canny, 50, 150);
 
-            Core.inRange(HSVsource, new Scalar(0, 0, 0), new Scalar(100, 100, 100), redFilter);
-            return redFilter;
+            Imgproc.HoughLinesP(canny, lines, 1, 3.1415/180, 15, 75, 20);
+
+            Imgproc.findContours(lines, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            Mat left = new Mat(lines, new Rect(0, 0, 427, 720));
+            Mat center = new Mat(lines, new Rect(427, 0, 427, 720));
+            Mat right = new Mat(lines, new Rect(853, 0, 426, 720));
+
+            Imgproc.findContours(left, leftCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(center, centerCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(right, rightCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+
+
+            return blueFilter;
         }
     }
 
