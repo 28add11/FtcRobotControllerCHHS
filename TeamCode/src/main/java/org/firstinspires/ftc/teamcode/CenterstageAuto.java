@@ -61,6 +61,8 @@ public class CenterstageAuto extends LinearOpMode
     // Computer vision stuff
     AprilTagProcessor aprilTags;
     //VisionPortal.Builder VisionPortalBuilder;
+
+    autoPipeline customPipeline;
     VisionPortal visionPortal;
 
 
@@ -162,11 +164,11 @@ public class CenterstageAuto extends LinearOpMode
         // Create the AprilTag processor and assign it to a variable.
         aprilTags = AprilTagProcessor.easyCreateWithDefaults();
 
-
+        customPipeline = new autoPipeline();
         // Create a new VisionPortal.
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .addProcessors(aprilTags, new autoPipeline())
+                .addProcessors(aprilTags, customPipeline)
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .enableLiveView(true)
@@ -181,6 +183,8 @@ public class CenterstageAuto extends LinearOpMode
          */
         waitForStart();
 
+
+
         driveDistance(2.75, 1); //Auto segment to park
         setMotorInstruction(0.75, 0 );
         sleep(900);
@@ -190,15 +194,9 @@ public class CenterstageAuto extends LinearOpMode
             /*
              * Send some stats to the telemetry
              */
-            /*
-            telemetry.addData("Frame Count", camera.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", camera.getFps()));
-            telemetry.addData("Total frame time ms", camera.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", camera.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", camera.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", camera.getCurrentPipelineMaxFps());
+
+            telemetry.addData("Zone:", customPipeline.getZone());
             telemetry.update();
-            */
 
             /*
              * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
@@ -231,12 +229,10 @@ public class CenterstageAuto extends LinearOpMode
         Mat HSVsource = new Mat();
         Mat blur = new Mat();
         Mat blueFilter = new Mat();
+        Mat redFilter = new Mat();
         Mat canny = new Mat();
         Mat lines = new Mat();
 
-        Mat left = new Mat(HSVsource, new Rect(0, 0, 427, 720));
-        Mat center = new Mat(HSVsource, new Rect(427, 0, 427, 720));
-        Mat right = new Mat(HSVsource, new Rect(853, 0, 426, 720));
         int zone = -1;
         @Override
         public Mat processFrame(Mat input, long captureTimeNanos)
@@ -247,27 +243,44 @@ public class CenterstageAuto extends LinearOpMode
             java.util.List<MatOfPoint> centerCont = new java.util.ArrayList<MatOfPoint>();
             java.util.List<MatOfPoint> rightCont = new java.util.ArrayList<MatOfPoint>();
 
-            Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_RGBA2RGB);
+            Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_RGBA2RGB); //These color space conversions are annoying but necessary
             Imgproc.cvtColor(RGBsource, HSVsource, Imgproc.COLOR_RGB2HSV);
             Imgproc.blur(HSVsource, blur, new org.opencv.core.Size(10, 10)); //apply blur to make errors in the tape less impactful
-            Core.inRange(blur, new Scalar(194, 60, 43), new Scalar(250, 100, 100), blueFilter);
-            Imgproc.Canny(blueFilter, canny, 50, 150);
 
-            Imgproc.HoughLinesP(canny, lines, 1, 3.1415/180, 15, 75, 20);
+            Core.inRange(blur, new Scalar(194, 60, 43), new Scalar(250, 100, 100), blueFilter); //filter out our colors to just what we want
+            Core.inRange(blur, new Scalar(0, 50, 60), new Scalar(20, 100, 100), redFilter);
 
-            Imgproc.findContours(lines, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+            if (Core.countNonZero(blueFilter) > Core.countNonZero(redFilter)) {
+                Imgproc.Canny(blueFilter, canny, 50, 150); //detect edges (of any type)
+            } else {
+                Imgproc.Canny(redFilter, canny, 50, 150); //if we are on the red side then...
+            }
 
-            Mat left = new Mat(lines, new Rect(0, 0, 427, 720));
+
+            //magic numbers are for the algo. I have no clue what they do.
+            Imgproc.HoughLinesP(canny, lines, 1, 3.1415/180, 15, 75, 20); //Detect lines
+
+            Mat left = new Mat(lines, new Rect(0, 0, 427, 720)); //Break frame into thirds (for location detection)
             Mat center = new Mat(lines, new Rect(427, 0, 427, 720));
             Mat right = new Mat(lines, new Rect(853, 0, 426, 720));
 
-            Imgproc.findContours(left, leftCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(left, leftCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE); //Turn edges into useable form
             Imgproc.findContours(center, centerCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
             Imgproc.findContours(right, rightCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
+            if (leftCont.size() > centerCont.size() && leftCont.size() > rightCont.size()){
+                zone = 0;
+            } else if(centerCont.size() > leftCont.size() && centerCont.size() > rightCont.size()){
+                zone = 1;
+            } else if(rightCont.size() > leftCont.size() && rightCont.size() > centerCont.size()){
+                zone = 2;
+            }
 
+            return lines;
+        }
 
-            return blueFilter;
+        public int getZone(){
+            return zone;
         }
     }
 
