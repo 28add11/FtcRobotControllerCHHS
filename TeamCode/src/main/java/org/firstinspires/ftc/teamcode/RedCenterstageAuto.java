@@ -24,24 +24,19 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import android.util.Size;
@@ -49,13 +44,12 @@ import org.opencv.imgproc.Imgproc;
 
 
 import java.lang.Math;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+
 import android.graphics.Canvas;
 
 
 @Autonomous()
-public class CenterstageAuto extends LinearOpMode
+public class RedCenterstageAuto extends LinearOpMode
 {
 
     // Computer vision stuff
@@ -121,11 +115,12 @@ public class CenterstageAuto extends LinearOpMode
         rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //SPEED
-        leftMotor.setPower(speed);
         rightMotor.setPower(speed);
+        leftMotor.setPower(speed * 0.9);
+
 
         while (leftMotor.isBusy() && rightMotor.isBusy()) {
-            leftMotor.setPower(speed);
+            leftMotor.setPower(speed * 0.9);
             rightMotor.setPower(speed);
         }
         leftMotor.setPower(0);
@@ -162,18 +157,23 @@ public class CenterstageAuto extends LinearOpMode
         // Computer vision initialization
 
         // Create the AprilTag processor and assign it to a variable.
-        aprilTags = AprilTagProcessor.easyCreateWithDefaults();
+        //aprilTags = AprilTagProcessor.easyCreateWithDefaults();
 
         customPipeline = new autoPipeline();
         // Create a new VisionPortal.
+        //VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), customPipeline);
+
         visionPortal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .addProcessors(aprilTags, customPipeline)
+                .addProcessors(customPipeline)
                 .setCameraResolution(new Size(640, 480))
                 .setStreamFormat(VisionPortal.StreamFormat.YUY2)
                 .enableLiveView(true)
                 .setAutoStopLiveView(true)
                 .build();
+
+
+
 
         telemetry.addLine("Waiting for start");
         telemetry.update();
@@ -187,8 +187,10 @@ public class CenterstageAuto extends LinearOpMode
 
         driveDistance(2.75, 1); //Auto segment to park
         setMotorInstruction(0.75, 0 );
-        sleep(900);
-        driveDistance(4, 1);
+        sleep(2000);
+        driveDistance(5, 1);
+
+
 
         while (opModeIsActive()) {
             /*
@@ -231,7 +233,9 @@ public class CenterstageAuto extends LinearOpMode
         Mat blueFilter = new Mat();
         Mat redFilter = new Mat();
         Mat canny = new Mat();
-        Mat lines = new Mat();
+        Mat leftLines = new Mat();
+        Mat centerLines = new Mat();
+        Mat rightLines = new Mat();
 
         int zone = -1;
         @Override
@@ -243,8 +247,8 @@ public class CenterstageAuto extends LinearOpMode
             java.util.List<MatOfPoint> centerCont = new java.util.ArrayList<MatOfPoint>();
             java.util.List<MatOfPoint> rightCont = new java.util.ArrayList<MatOfPoint>();
 
-            Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_RGBA2RGB); //These color space conversions are annoying but necessary
-            Imgproc.cvtColor(RGBsource, HSVsource, Imgproc.COLOR_RGB2HSV);
+            //Imgproc.cvtColor(input, RGBsource, Imgproc.COLOR_BGR2RGB); //These color space conversions are annoying but necessary
+            Imgproc.cvtColor(input, HSVsource, Imgproc.COLOR_RGB2HSV);
             Imgproc.blur(HSVsource, blur, new org.opencv.core.Size(10, 10)); //apply blur to make errors in the tape less impactful
 
             Core.inRange(blur, new Scalar(194, 60, 43), new Scalar(250, 100, 100), blueFilter); //filter out our colors to just what we want
@@ -257,12 +261,14 @@ public class CenterstageAuto extends LinearOpMode
             }
 
 
-            //magic numbers are for the algo. I have no clue what they do.
-            Imgproc.HoughLinesP(canny, lines, 1, 3.1415/180, 15, 75, 20); //Detect lines
+            Mat left = new Mat(canny, new Rect(0, 0, 213, 480)); //Break frame into thirds (for location detection)
+            Mat center = new Mat(canny, new Rect(213, 0, 213, 480));
+            Mat right = new Mat(canny, new Rect(426, 0, 214, 480));
 
-            Mat left = new Mat(lines, new Rect(0, 0, 427, 720)); //Break frame into thirds (for location detection)
-            Mat center = new Mat(lines, new Rect(427, 0, 427, 720));
-            Mat right = new Mat(lines, new Rect(853, 0, 426, 720));
+            //magic numbers are for the algo. I have no clue what they do.
+            Imgproc.HoughLinesP(left, leftLines, 1, 3.1415/180, 15, 75, 20); //Detect lines
+            Imgproc.HoughLinesP(center, centerLines, 1, 3.1415/180, 15, 75, 20);
+            Imgproc.HoughLinesP(right, rightLines, 1, 3.1415/180, 15, 75, 20);
 
             Imgproc.findContours(left, leftCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE); //Turn edges into useable form
             Imgproc.findContours(center, centerCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -276,7 +282,8 @@ public class CenterstageAuto extends LinearOpMode
                 zone = 2;
             }
 
-            return lines;
+            Imgproc.cvtColor(input, blueFilter, Imgproc.COLOR_RGB2GRAY);
+            return blueFilter;
         }
 
         public int getZone(){

@@ -78,8 +78,8 @@ public class TeleOp_MAIN extends LinearOpMode {
 
     double leftPincherPOS = (MID_PINCHER); //For step up/step down
     double rightPincherPOS = (MID_PINCHER);
-    boolean Lpinch = false;
-    boolean Rpinch = false;
+    boolean Lpinch = true;
+    boolean Rpinch = true;
     boolean bumperLpressed = false; //Serves to make sure launched doesn't oscillate every cycle
     boolean bumperRpressed = false;
 
