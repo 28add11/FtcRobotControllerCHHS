@@ -47,38 +47,8 @@ public class diffySwerve extends LinearOpMode{
 
     // Declare OpMode members for each of the 2 motors.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor rightMotor = null;
-    private DcMotor leftMotor = null;
-
-    private DcMotor armL = null;
-    private DcMotor armR = null;
-    private DcMotor extend = null;
-
-    // Servo stuff
-    private Servo planeLauncher = null;
-    static final double MIN_LAUNCHER = 90.0/270.0;
-    static final double MAX_LAUNCHER       =   0.0/270.0;     // Maximum rotational position for the launcher servo
-    double incrumentLauncher = 0.1;
-
-    double launcherPOS = (MIN_LAUNCHER);
-    boolean launched = false;
-    boolean buttonBpressed = false; //Serves to make sure launched doesn't oscillate every cycle
-
-    private Servo pincherR = null;
-    private Servo pincherL = null;
-
-    static final double MIN_PINCHER = 0.0/270.0;
-
-    static final double MID_PINCHER = 45.0/270.0;
-    static final double MAX_PINCHER       =   90.0/270.0;     // Maximum rotational position for the launcher servo
-    double incrumentPincher = 0.1;
-
-    double leftPincherPOS = (MID_PINCHER); //For step up/step down
-    double rightPincherPOS = (MID_PINCHER);
-    boolean Lpinch = true;
-    boolean Rpinch = true;
-    boolean bumperLpressed = false; //Serves to make sure launched doesn't oscillate every cycle
-    boolean bumperRpressed = false;
+    private DcMotor driveMotor = null;
+    private DcMotor turnMotor = null;
 
     static final int    CYCLE_MS        =           50;     // period of each cycle
     // Define class members
@@ -87,53 +57,31 @@ public class diffySwerve extends LinearOpMode{
 
     public void diffSwerve(double turn, double drive){
 
-        double leftPower;
-        double rightPower;
-
-        double turningPower = turn * 2; //gear ratio
+        double drivePower;
+        double turningPower = Range.clip(turn, -1.0, 1.0) * -2; //gear ratio
 
         // POV Mode uses left joystick to go forward & back, and right joystick to rotate.
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0);
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0);
+        drivePower    = Range.clip(drive, -1.0, 1.0);
+        //32 to 64 gear ratio
 
-        //32 to 64
+        // Send calculated power to wheels
+        driveMotor.setPower(drivePower);
+        turnMotor.setPower(turningPower);
 
+        telemetry.addData("Drive", "%4.2f", drivePower);
+        telemetry.addData("Turn", "%4.2f", turningPower);
 
     }
 
     //movementY is forward-back movement (negative backwards positive forwards), movementX is left-right movement (negative left positive right).
-    public void setMotorInstruction(double turn, double drive) {
-
-        double leftPower;
-        double rightPower;
-
-        // POV Mode uses left joystick to go forward & back, and right joystick to rotate.
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0);
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0);
-
-        // Send calculated power to wheels
-        leftMotor.setPower(leftPower);
-        rightMotor.setPower(rightPower);
-
-        telemetry.addData("Left", "%4.2f", leftPower);
-        telemetry.addData("Right", "%4.2f", rightPower);
-        //telemetry.update();
-    }
 
     @Override
     public void runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
-        rightMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
-        armL = hardwareMap.get(DcMotor.class, "armLeft");
-        armR = hardwareMap.get(DcMotor.class, "armRight");
-        extend = hardwareMap.get(DcMotor.class, "extender");
-        planeLauncher = hardwareMap.get(Servo.class, "launcher");
-
-        pincherR = hardwareMap.get(Servo.class, "rightPinch");
-        pincherL = hardwareMap.get(Servo.class, "leftPinch");
+        driveMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
+        turnMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
 
 
         // ########################################################################################
@@ -146,10 +94,8 @@ public class diffySwerve extends LinearOpMode{
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightMotor.setDirection(DcMotor.Direction.FORWARD);
-        armL.setDirection(DcMotor.Direction.FORWARD);
-        armR.setDirection(DcMotor.Direction.REVERSE);
+        turnMotor.setDirection(DcMotor.Direction.FORWARD);
+        driveMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
         // Wait for the game to start (driver presses PLAY)
@@ -170,88 +116,14 @@ public class diffySwerve extends LinearOpMode{
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            double drive    =  gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double turn     =  gamepad1.right_stick_x;
+            double y    =  gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            double x     =  gamepad1.right_stick_x;
 
-            // SERVO STUFF
-            if (gamepad1.b && !buttonBpressed) {   //if the B button is pressed and was not pressed the previous mainloop cycle, then...
-                launched = !launched;
-                buttonBpressed = true;
-            } else if (buttonBpressed && !gamepad1.b) { //if no button was pressed and ispressed is true, then...
-                buttonBpressed = false;
-            }
 
-            if (gamepad2.left_bumper && !bumperLpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
-                Lpinch = !Lpinch;
-                bumperLpressed = true;
-            } else if (bumperLpressed && !gamepad2.left_bumper) { //if no button was pressed and ispressed is true, then...
-                bumperLpressed = false;
-            }
-            if (gamepad2.right_bumper && !bumperRpressed) {   //if the X button is pressed and was not pressed the previous mainloop cycle, then...
-                Rpinch = !Rpinch;
-                bumperRpressed = true;
-            } else if (bumperRpressed && !gamepad2.right_bumper) { //if no button was pressed and ispressed is true, then...
-                bumperRpressed = false;
-            }
-
-            if (launched) {
-                // Keep stepping up until we hit the max value.
-                launcherPOS += incrumentLauncher;
-                if (launcherPOS > MAX_LAUNCHER ) {
-                    launcherPOS = MAX_LAUNCHER;
-                }
-            }
-            else {
-                // Keep stepping down until we hit the min value.
-                launcherPOS -= incrumentLauncher;
-                if (launcherPOS < MIN_LAUNCHER ) {
-                    launcherPOS = MIN_LAUNCHER;
-                }
-            }
-
-            if (Lpinch) {
-                // Keep stepping up until we hit the max value.
-                leftPincherPOS += incrumentPincher;
-                if (leftPincherPOS > MAX_PINCHER) {
-                    leftPincherPOS = MAX_PINCHER;
-                }
-            } else {
-                leftPincherPOS -= incrumentPincher;
-                if (leftPincherPOS < MID_PINCHER ) {
-                    leftPincherPOS = MID_PINCHER;
-                }
-            }
-            if (Rpinch) {
-                rightPincherPOS -= incrumentPincher;
-                if (rightPincherPOS < MIN_PINCHER) {
-                    rightPincherPOS = MIN_PINCHER;
-                }
-            } else {
-                // Keep stepping down until we hit the min value.
-                rightPincherPOS += incrumentPincher;
-                if (rightPincherPOS > MID_PINCHER ) {
-                    rightPincherPOS = MID_PINCHER;
-                }
-            }
 
 
             // Motor Control
-            setMotorInstruction(drive, -turn);
-
-            float armPower;
-            if (gamepad2.left_stick_y < 0){
-                armPower = 0; //Add nonlinear accel later
-            }
-
-            armL.setPower(gamepad2.left_stick_y * 0.4);
-            armR.setPower(gamepad2.left_stick_y * 0.4);
-            extend.setPower(gamepad2.right_stick_y * 0.4);
-
-
-            planeLauncher.setPosition(launcherPOS);
-            pincherL.setPosition(leftPincherPOS);
-            pincherR.setPosition(rightPincherPOS);
-
+            diffSwerve(drive, turn);
 
             sleep(CYCLE_MS);
             idle();
