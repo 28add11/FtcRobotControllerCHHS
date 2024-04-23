@@ -50,7 +50,10 @@ public class diffySwerve extends LinearOpMode{
     private DcMotor driveMotor = null;
     private DcMotor turnMotor = null;
 
+    private int currentTicks;
+
     static final int    CYCLE_MS        =           50;     // period of each cycle
+
     // Define class members
 
     //Servo stuff end
@@ -58,18 +61,19 @@ public class diffySwerve extends LinearOpMode{
     public void diffSwerve(double turn, double drive){
 
         double drivePower;
-        double turningPower = Range.clip(turn, -1.0, 1.0) * -2; //gear ratio
 
         // POV Mode uses left joystick to go forward & back, and right joystick to rotate.
         drivePower    = Range.clip(drive, -1.0, 1.0);
         //32 to 64 gear ratio
 
+        // Calculate where to move the motor to
+        int desiredPos = ;
+
         // Send calculated power to wheels
         driveMotor.setPower(drivePower);
-        turnMotor.setPower(turningPower);
 
         telemetry.addData("Drive", "%4.2f", drivePower);
-        telemetry.addData("Turn", "%4.2f", turningPower);
+        telemetry.addData("Turn", "%4.2f", turn);
 
     }
 
@@ -82,6 +86,11 @@ public class diffySwerve extends LinearOpMode{
         // to the names assigned during the robot configuration step on the DS or RC devices.
         driveMotor  = hardwareMap.get(DcMotor.class, "leftMotor");
         turnMotor  = hardwareMap.get(DcMotor.class, "rightMotor");
+
+        // Reset the motor encoder so that it reads zero ticks
+        turnMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        currentTicks = turnMotor.getCurrentPosition();
 
 
         // ########################################################################################
@@ -119,8 +128,9 @@ public class diffySwerve extends LinearOpMode{
             double y    =  gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double x     =  gamepad1.right_stick_x;
 
+            double turn = Math.toDegrees(Math.atan2(x, y));
 
-
+            double drive = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 
             // Motor Control
             diffSwerve(drive, turn);
